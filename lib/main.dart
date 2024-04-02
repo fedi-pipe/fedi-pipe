@@ -113,7 +113,14 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            GaleContainer(child: const Text('Hello, Gale!')),
+            GaleContainer(
+                predicates: [GaleColorBg.red200, GaleRounded.sm, GaleShadow.xl],
+                child: GaleTypography.h1(text: 'Hello, Gale!')),
+            GaleCircle(
+              radius: 80.0,
+              predicates: [GaleColorBg.blue300],
+              child: const Icon(Icons.add),
+            )
           ],
         ),
       ),
