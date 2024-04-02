@@ -1,3 +1,4 @@
+import 'package:fedi_pipe/gale_showcase.dart';
 import 'package:flutter/material.dart';
 import 'package:gale/gale.dart';
 
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        textTheme: TextTheme(headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold, color: Colors.black)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -114,11 +116,11 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             GaleContainer(
-                predicates: [GaleColorBg.red200, GaleRounded.sm, GaleShadow.xl],
+                predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
                 child: GaleTypography.h1(text: 'Hello, Gale!')),
             GaleCircle(
               radius: 80.0,
-              predicates: [GaleColorBg.blue300],
+              predicates: (style) => [style.bg.blue300],
               child: const Icon(Icons.add),
             )
           ],
