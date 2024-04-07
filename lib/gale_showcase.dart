@@ -78,19 +78,19 @@ class _GaleFontWeight extends GalePredicate {
   _GaleFontWeight([this.value = FontWeight.normal]) : super(value);
 }
 
-class GaleHStackStyle extends GaleWidgetStyle {
-  const GaleHStackStyle();
+class GaleVStackStyle extends GaleWidgetStyle {
+  const GaleVStackStyle();
 
-  get vertical => GaleMainAxisAlignment();
-  get horizontal => GaleCrossAxisAlignment();
+  GaleMainAxisAlignment get vertical => GaleMainAxisAlignment();
+  GaleCrossAxisAlignment get horizontal => GaleCrossAxisAlignment();
 
   get shrink => GaleMainAxisSize(MainAxisSize.min);
 }
 
-class GaleHStack extends GaleWidget<GaleHStackStyle>
+class GaleVStack extends GaleWidget<GaleVStackStyle>
     implements IGaleMainAxisAlignment, IGaleCrossAxisAlignment, IGaleMainAxisSize {
   @override
-  late GaleWidgetPredicateGenerator<GaleHStackStyle>? predicates;
+  late GaleWidgetPredicateGenerator<GaleVStackStyle>? predicates;
 
   @override
   get interpretedPredicates => predicates != null && style != null ? predicates!(style!) : [];
@@ -99,11 +99,11 @@ class GaleHStack extends GaleWidget<GaleHStackStyle>
   get horizontalAlign => crossAxisAlignment;
 
   @override
-  GaleHStackStyle? style;
+  GaleVStackStyle? style;
 
   List<Widget> children;
 
-  GaleHStack({this.predicates, this.style = const GaleHStackStyle(), this.children = const [], super.key});
+  GaleVStack({this.predicates, this.style = const GaleVStackStyle(), this.children = const [], super.key});
 
   @override
   Widget build(BuildContext context) {
