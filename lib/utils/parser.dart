@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:collection';
 
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 const selfClosingTags = [
@@ -65,8 +67,20 @@ abstract class DOMNode {
   // o.children = children
   DOMNode? parent;
   List<DOMNode> children;
+  LinkedHashMap<Object, String>? attributes;
 
-  DOMNode({this.parent, this.children = const []});
+  DOMNode({this.parent, this.children = const [], this.attributes});
+
+  List<DOMNode> flatten() {
+    final nodes = <DOMNode>[];
+    nodes.add(this);
+
+    for (final child in children) {
+      nodes.addAll(child.flatten());
+    }
+
+    return nodes;
+  }
 }
 
 class TextNode extends DOMNode {
@@ -77,9 +91,8 @@ class TextNode extends DOMNode {
 
 class ElementNode extends DOMNode {
   String tag;
-  Map<String, String> attributes;
 
-  ElementNode(this.tag, {this.attributes = const {}, super.parent, super.children});
+  ElementNode(this.tag, {super.attributes, super.parent, super.children});
 }
 
 class HTMLParser {
