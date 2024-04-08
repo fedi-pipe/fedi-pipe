@@ -97,18 +97,53 @@ class HTMLParser {
     }
   }
 
+  DOMNode breakdown(Node domNode) {
+    if (domNode is Text) {
+      return TextNode(domNode.text);
+    }
+
+    if (domNode is Comment) {
+      return TextNode(domNode.text!);
+    }
+
+    if (domNode is DocumentFragment) {
+      final children = domNode.nodes;
+      final newChildren = children.map((e) => breakdown(e)).toList();
+      return ElementNode("fragment", children: newChildren);
+    }
+
+    if (domNode is Document) {
+      final children = domNode.nodes;
+      final newChildren = children.map((e) => breakdown(e)).toList();
+      return ElementNode("document", children: newChildren);
+    }
+
+    if (domNode is DocumentType) {
+      return TextNode(domNode.text!);
+    }
+
+    final elementNode = domNode as Element;
+    final node = ElementNode(elementNode.localName ?? "", attributes: domNode.attributes);
+
+    if (selfClosingTags.contains(node.tag)) {
+      return node;
+    }
+
+    if (blockElements.contains(node.tag)) {
+      final children = domNode.nodes;
+      final newChildren = children.map((e) => breakdown(e)).toList();
+      node.children = newChildren;
+    }
+
+    return node;
+  }
+
   Future<DOMNode> parse() async {
     HtmlParser parser = HtmlParser(content);
     final document = parser.parse();
     final bodyNode = document.querySelector("body");
-    final rootNode = ElementNode("html");
 
-    // TODO : assign children to parent recursively
-    final children = bodyNode!.children.map((e) {
-      return ElementNode(e.localName ?? "", children: []);
-    });
-
-    rootNode.children = children.toList();
+    final rootNode = breakdown(bodyNode!);
 
     return rootNode;
   }
