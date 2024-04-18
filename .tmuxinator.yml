@@ -7,7 +7,7 @@ windows:
   - frontend:
       layout: main-vertical
       panes:
-        - export COC_ENABLED="true"  && vim .
+        - export COC_ENABLED="true"  && vim pubspec.yaml term:///bin/zsh -O
   - library:
       layout: main-vertical
       panes:
