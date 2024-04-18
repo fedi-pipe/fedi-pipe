@@ -1,4 +1,6 @@
+import 'package:fedi_pipe/components/mastodon_status_card.dart';
 import 'package:fedi_pipe/gale_showcase.dart';
+import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:flutter/material.dart';
 import 'package:gale/gale.dart';
 
@@ -90,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "poll": null,
         "uri": "https://social.silicon.moe/users/kodingwarrior/statuses/109451141394293091",
         "id": "109451141394293091",
-        "url": "https://social.silicon.moe/@k odingwarrior/109451141394293091",
+        "url": "https://social.silicon.moe/@kodingwarrior/109451141394293091",
         "account": {
           "group": false,
           "locked": false,
@@ -100,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
           "avatar_static":
               "https://mstdn-cdn.e14forest.net/accounts/avatars/109/309/382/773/915/357/original/82c4fc390c12f8f7.jpg",
           "avatar":
-              "https://mstdn-cdn.e14forest.ne t/accounts/avatars/109/309/382/773/915/357/original/82c4fc390c12f8f7.jpg",
+              "https://mstdn-cdn.e14forest.net/accounts/avatars/109/309/382/773/915/357/original/82c4fc390c12f8f7.jpg",
           "statuses_count": 915,
           "following_count": 341,
           "created_at": "2022-11-08T00:00:00.000Z",
@@ -117,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "https://mstdn-cdn.e14forest.net/accounts/he aders/109/309/382/773/915/357/original/ebb49a10d52ad739.jpg",
           "emojis": [
             {
-              "url": "https://mstdn-cdn.e14forest.net/custom_emojis/images/000/004/716/original/33efddaa0f52ba3d.pn g",
+              "url": "https://mstdn-cdn.e14forest.net/custom_emojis/images/000/004/716/original/33efddaa0f52ba3d.png",
               "shortcode": "vim",
               "static_url":
                   "https://mstdn-cdn.e14forest.net/custom_emojis/images/000/004/716/static/33efddaa0f52ba3d.png",
@@ -291,6 +293,10 @@ class _MyHomePageState extends State<MyHomePage> {
               radius: 80.0,
               predicates: (style) => [style.bg.blue300],
               child: const Icon(Icons.add),
+            ),
+            GaleVStack(
+              predicates: (style) => [style.vertical.start, style.horizontal.start, style.shrink],
+              children: [...statuses.map((status) => MastodonStatusCard(status: status))],
             )
           ],
         ),
