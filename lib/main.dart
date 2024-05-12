@@ -2,6 +2,7 @@ import 'package:fedi_pipe/components/mastodon_status_card.dart';
 import 'package:fedi_pipe/gale_showcase.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gale/gale.dart';
 
 void main() {
@@ -61,6 +62,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -82,6 +89,61 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+      appBar: null,
+      bottomNavigationBar: BottomNavigationBar(
+          currentIndex: index,
+          onTap: (int index) {
+            setState(() {
+              this.index = index;
+            });
+          },
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notification'),
+            BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Bookmark'),
+          ]),
+      body: pages[index],
+    );
+  }
+
+  List<Widget> get pages {
+    return [
+      PublicTimelinePage(),
+      NotificationPage(),
+      BookmarkPage(),
+    ];
+  }
+}
+
+class NotificationPage extends StatelessWidget {
+  const NotificationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Placeholder(),
+        Placeholder(),
+      ],
+    );
+  }
+}
+
+class BookmarkPage extends StatelessWidget {
+  const BookmarkPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Placeholder();
+  }
+}
+
+class PublicTimelinePage extends StatelessWidget {
+  const PublicTimelinePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
@@ -89,54 +151,50 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Public Timeline'),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            GaleContainer(
-                predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
-                child: GaleTypography.h1(text: 'Hello, Gale!')),
-            GaleCircle(
-              radius: 80.0,
-              predicates: (style) => [style.bg.blue300],
-              child: const Icon(Icons.add),
-            ),
-            GaleVStack(
-              predicates: (style) => [style.vertical.start, style.horizontal.start, style.shrink],
-              children: [...statuses.map((status) => MastodonStatusCard(status: status))],
-            )
-          ],
-        ),
+        child: FutureBuilder(
+            future: MastodonStatusRepository.fetchStatuses(),
+            builder: (context, snapshot) {
+              final statuses = snapshot.data ?? [];
+              return ListView(
+                // Column is also a layout widget. It takes a list of children and
+                // arranges them vertically. By default, it sizes itself to fit its
+                // children horizontally, and tries to be as tall as its parent.
+                //
+                // Column has various properties to control how it sizes itself and
+                // how it positions its children. Here we use mainAxisAlignment to
+                // center the children vertically; the main axis here is the vertical
+                // axis because Columns are vertical (the cross axis would be
+                // horizontal).
+                //
+                // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+                // action in the IDE, or press "p" in the console), to see the
+                // wireframe for each widget.
+                shrinkWrap: true,
+                children: <Widget>[
+                  const Text(
+                    'You have pushed the button this many times:',
+                  ),
+                  GaleContainer(
+                      predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
+                      child: GaleTypography.h1(text: 'Hello, Gale!')),
+                  GaleCircle(
+                    radius: 80.0,
+                    predicates: (style) => [style.bg.blue300],
+                    child: const Icon(Icons.add),
+                  ),
+                  GaleVList(
+                    predicates: (style) => [style.vertical.start, style.horizontal.start],
+                    children: [...statuses.map((status) => MastodonStatusCard(status: status))],
+                  )
+                ],
+              );
+            }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
