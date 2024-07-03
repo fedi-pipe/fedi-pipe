@@ -19,6 +19,10 @@ class MastodonBaseRepository {
     return _instance!.client!;
   }
 
+  static void resetConnection() {
+    _instance = null;
+  }
+
   static Future<Response> get(String path) async {
     final url = instance.endpointUrl + path;
     return await instance.get(url);
