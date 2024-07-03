@@ -8,17 +8,25 @@ class MastodonClient {
   MastodonClient({required this.endpointUrl, required this.accessToken});
 
   Future<http.Response> get(String url) async {
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url), headers: headers);
     return response;
   }
+
+  Map<String, String> get defaultHeaders => {
+        'Content-Type': 'application/json',
+      };
+
+  Map<String, String> get headers => accessToken.isEmpty
+      ? defaultHeaders
+      : {
+          ...defaultHeaders,
+          'Authorization': 'Bearer $accessToken',
+        };
 
   Future<http.Response> post(String url, Map<String, dynamic> body) async {
     final response = await http.post(
       Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: body,
     );
 
@@ -28,10 +36,7 @@ class MastodonClient {
   Future<http.Response> delete(String url) async {
     final response = await http.delete(
       Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
     );
 
     return response;
@@ -40,10 +45,7 @@ class MastodonClient {
   Future<http.Response> put(String url, Map<String, dynamic> body) async {
     final response = await http.put(
       Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: body,
     );
 
