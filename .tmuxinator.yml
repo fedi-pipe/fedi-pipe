@@ -1,18 +1,10 @@
 
 name: fedi-pipe
-root: ~/personal/fedi_pipe
+root: .
 
 pre_window:
 windows:
   - frontend:
       layout: main-vertical
       panes:
-        - export COC_ENABLED="true"  && vim pubspec.yaml term:///bin/zsh -O
-  - library:
-      layout: main-vertical
-      panes:
-        - export COC_ENABLED="true"  && cd ../gale && vim .
-  # - debugging:
-  #     layout: main-vertical
-  #     panes:
-  #       - milk_tarot_mobile/ && flutter pub run build_runner watch --delete-conflicting-outputs
+        - vim pubspec.yaml term:///bin/zsh -O
