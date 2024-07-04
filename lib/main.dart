@@ -1,9 +1,8 @@
 import 'package:fedi_pipe/components/mastodon_status_card.dart';
-import 'package:fedi_pipe/gale_showcase.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gale/gale.dart';
 
 void main() {
   runApp(const MyApp());
@@ -179,16 +178,16 @@ class PublicTimelinePage extends StatelessWidget {
                   const Text(
                     'You have pushed the button this many times:',
                   ),
-                  GaleContainer(
-                      predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
-                      child: GaleTypography.h1(text: 'Hello, Gale!')),
-                  GaleCircle(
-                    radius: 80.0,
-                    predicates: (style) => [style.bg.blue300],
-                    child: const Icon(Icons.add),
-                  ),
-                  GaleVList(
-                    predicates: (style) => [style.vertical.start, style.horizontal.start],
+                  // GaleContainer(
+                  //     predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
+                  //     child: GaleTypography.h1(text: 'Hello, Gale!')),
+                  // GaleCircle(
+                  //   radius: 80.0,
+                  //   predicates: (style) => [style.bg.blue300],
+                  //   child: const Icon(Icons.add),
+                  // ),
+                  ListView(
+                    shrinkWrap: true,
                     children: [...statuses.map((status) => MastodonStatusCard(status: status))],
                   )
                 ],

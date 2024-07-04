@@ -1,11 +1,10 @@
-import 'package:fedi_pipe/gale_showcase.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:flutter/material.dart';
 
 class MastodonStatusCard extends StatefulWidget {
   const MastodonStatusCard({super.key, required this.status});
 
-  final MastodonStatus status;
+  final MastodonStatusModel status;
 
   @override
   State<MastodonStatusCard> createState() => _MastodonStatusCardState();
