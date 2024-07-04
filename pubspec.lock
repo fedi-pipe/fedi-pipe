@@ -99,13 +99,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  gale:
-    dependency: "direct main"
-    description:
-      path: "../gale"
-      relative: true
-    source: path
-    version: "0.0.1"
   html:
     dependency: "direct main"
     description:
@@ -297,4 +290,4 @@ packages:
     version: "0.5.1"
 sdks:
   dart: ">=3.3.1 <4.0.0"
-  flutter: ">=3.0.0"
+  flutter: ">=1.16.0"
