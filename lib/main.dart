@@ -1,5 +1,7 @@
 import 'package:fedi_pipe/components/mastodon_status_card.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/pages/bookmark_page.dart';
+import 'package:fedi_pipe/pages/notification_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -111,29 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
       NotificationPage(),
       BookmarkPage(),
     ];
-  }
-}
-
-class NotificationPage extends StatelessWidget {
-  const NotificationPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Placeholder(),
-        Placeholder(),
-      ],
-    );
-  }
-}
-
-class BookmarkPage extends StatelessWidget {
-  const BookmarkPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Placeholder();
   }
 }
 
