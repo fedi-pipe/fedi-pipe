@@ -1,13 +1,15 @@
 import 'package:http/http.dart' as http;
 export 'package:http/http.dart' show Response;
 
+typedef HttpHeader = Map<String, String>;
+
 class MastodonClient {
   final String endpointUrl;
   final String accessToken;
 
   MastodonClient({required this.endpointUrl, required this.accessToken});
 
-  Future<http.Response> get(String url) async {
+  Future<http.Response> get(String url, {HttpHeader? headers}) async {
     final response = await http.get(Uri.parse(url), headers: headers);
     return response;
   }
@@ -23,7 +25,7 @@ class MastodonClient {
           'Authorization': 'Bearer $accessToken',
         };
 
-  Future<http.Response> post(String url, Map<String, dynamic> body) async {
+  Future<http.Response> post(String url, Map<String, dynamic> body, {HttpHeader? headers}) async {
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
@@ -33,7 +35,7 @@ class MastodonClient {
     return response;
   }
 
-  Future<http.Response> delete(String url) async {
+  Future<http.Response> delete(String url, {HttpHeader? headers}) async {
     final response = await http.delete(
       Uri.parse(url),
       headers: headers,
@@ -42,7 +44,7 @@ class MastodonClient {
     return response;
   }
 
-  Future<http.Response> put(String url, Map<String, dynamic> body) async {
+  Future<http.Response> put(String url, Map<String, dynamic> body, {HttpHeader? headers}) async {
     final response = await http.put(
       Uri.parse(url),
       headers: headers,
