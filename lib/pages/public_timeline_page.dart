@@ -31,7 +31,7 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
   @override
   void initState() {
     super.initState();
-    _fetchStatuses(direction: ScrollDirection.down); // Initial load
+    _fetchStatuses(direction: ScrollDirection.up); // Initial load
     _scrollController.addListener(_onScroll);
   }
 
@@ -66,46 +66,36 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
   }) async {
     if (_isLoading) return;
 
-    // If there's no more data in that direction, skip
-    if (direction == ScrollDirection.down && _nextId == 'no-more') return;
-    if (direction == ScrollDirection.up && _prevId == 'no-more') return;
-
     setState(() => _isLoading = true);
 
     try {
-      if (direction == ScrollDirection.down) {
-        // Load older statuses (past)
-        final newStatuses =
-            await MastodonStatusRepository.fetchStatuses(nextId: _nextId);
+      if (direction == ScrollDirection.up) {
+        // Load newer statuses (future)
+        final newStatuses = await MastodonStatusRepository.fetchStatuses(nextId: _nextId);
 
         if (newStatuses.isNotEmpty) {
           setState(() {
-            _statuses.addAll(newStatuses);
+            _statuses.insertAll(0, newStatuses);
             // In a real app, you would parse the Link headers (or the returned JSON)
             // to find the actual next/prev IDs. For demonstration:
-            _nextId = _statuses.last.id; 
-            _prevId ??= _statuses.first.id; // set if it's null
-          });
-        } else {
-          // If empty, you might mark 'no-more' so you don't keep calling
-          _nextId = 'no-more';
-        }
-      } else {
-        // Load newer statuses (future)
-        final newStatuses =
-            await MastodonStatusRepository.fetchStatuses(previousId: _prevId);
 
-        if (newStatuses.isNotEmpty) {
+            _prevId ??= _statuses.last.id; // set if it's null
+            _nextId = _statuses.first.id;
+          });
+        } else {}
+      } else {
+        // Load older statuses (past)
+        final oldStatuses = await MastodonStatusRepository.fetchStatuses(previousId: _prevId);
+
+        if (oldStatuses.isNotEmpty) {
           setState(() {
             // Insert new statuses at the top
-            _statuses.insertAll(0, newStatuses);
+            _statuses.addAll(oldStatuses);
             // Update IDs
-            _prevId = _statuses.first.id;
-            _nextId ??= _statuses.last.id; // set if it's null
+            _prevId = _statuses.last.id;
+            _nextId ??= _statuses.first.id; // set if it's null
           });
-        } else {
-          _prevId = 'no-more';
-        }
+        } else {}
       }
     } catch (e, st) {
       debugPrint('Error fetching statuses: $e\n$st');
@@ -141,9 +131,7 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const SizedBox.shrink(),
+                child: _isLoading ? const CircularProgressIndicator() : const SizedBox.shrink(),
               ),
             );
           }
@@ -152,4 +140,3 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
     );
   }
 }
-

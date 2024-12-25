@@ -23,9 +23,9 @@ class MastodonBaseRepository {
     _instance = null;
   }
 
-  static Future<Response> get(String path) async {
+  static Future<Response> get(String path, {Map<String, String>? queryParameters, Map<String, String>? headers}) async {
     final url = instance.endpointUrl + path;
-    return await instance.get(url);
+    return await instance.get(url, queryParameters: queryParameters, additionalHeaders: headers);
   }
 
   static Future<Response> post(String path, Map<String, dynamic> body) async {

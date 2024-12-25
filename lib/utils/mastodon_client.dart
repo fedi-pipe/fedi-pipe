@@ -9,8 +9,17 @@ class MastodonClient {
 
   MastodonClient({required this.endpointUrl, required this.accessToken});
 
-  Future<http.Response> get(String url, {HttpHeader? headers}) async {
-    final response = await http.get(Uri.parse(url), headers: headers);
+  Future<http.Response> get(String url, {Map<String, String>? queryParameters, HttpHeader? additionalHeaders}) async {
+    final headers = {
+      ...baseHeaders,
+      ...?additionalHeaders,
+    };
+    var urlWithParams = Uri.parse(url);
+    urlWithParams = urlWithParams.replace(queryParameters: queryParameters);
+    print('--------');
+    print(urlWithParams);
+    print('--------');
+    final response = await http.get(urlWithParams, headers: headers);
     return response;
   }
 
@@ -18,14 +27,18 @@ class MastodonClient {
         'Content-Type': 'application/json',
       };
 
-  Map<String, String> get headers => accessToken.isEmpty
+  Map<String, String> get baseHeaders => accessToken.isEmpty
       ? defaultHeaders
       : {
           ...defaultHeaders,
           'Authorization': 'Bearer $accessToken',
         };
 
-  Future<http.Response> post(String url, Map<String, dynamic> body, {HttpHeader? headers}) async {
+  Future<http.Response> post(String url, Map<String, dynamic> body, {HttpHeader? additionalHeaders}) async {
+    final headers = {
+      ...baseHeaders,
+      ...?additionalHeaders,
+    };
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
@@ -35,7 +48,11 @@ class MastodonClient {
     return response;
   }
 
-  Future<http.Response> delete(String url, {HttpHeader? headers}) async {
+  Future<http.Response> delete(String url, {HttpHeader? additionalHeaders}) async {
+    final headers = {
+      ...baseHeaders,
+      ...?additionalHeaders,
+    };
     final response = await http.delete(
       Uri.parse(url),
       headers: headers,
@@ -44,7 +61,11 @@ class MastodonClient {
     return response;
   }
 
-  Future<http.Response> put(String url, Map<String, dynamic> body, {HttpHeader? headers}) async {
+  Future<http.Response> put(String url, Map<String, dynamic> body, {HttpHeader? additionalHeaders}) async {
+    final headers = {
+      ...baseHeaders,
+      ...?additionalHeaders,
+    };
     final response = await http.put(
       Uri.parse(url),
       headers: headers,
