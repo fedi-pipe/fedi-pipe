@@ -37,6 +37,7 @@ dependencies:
   html: ^0.15.4
   flutter_bloc: ^8.1.5
   http: ^1.2.1
+  solidart: ^1.5.4
 
 dev_dependencies:
   flutter_test:
