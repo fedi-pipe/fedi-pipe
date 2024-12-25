@@ -1,4 +1,5 @@
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
+import 'package:fedi_pipe/repositories/persistent/drafts_repository.dart';
 import 'package:flutter/material.dart';
 
 class ComposePage extends StatelessWidget {
@@ -27,24 +28,38 @@ class ComposePage extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Post the status
-                print(_controller.text);
-                MastodonStatusRepository.postStatus(_controller.text);
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Post the status
+                    print(_controller.text);
+                    MastodonStatusRepository.postStatus(_controller.text);
 
-                Navigator.of(context).pop();
-                // Add a snackbar to show a message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Posted!'),
-                  ),
-                );
-              },
-              child: Text('Post'),
-            ),
+                    Navigator.of(context).pop();
+                    // Add a snackbar to show a message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Posted!'),
+                      ),
+                    );
+                  },
+                  child: Text('Post'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    final repository = DraftsRepository();
+                    repository.createDraft(_controller.text);
+                  },
+                  child: Text('Save as draft'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
