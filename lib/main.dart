@@ -118,66 +118,103 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class PublicTimelinePage extends StatelessWidget {
-  const PublicTimelinePage({super.key});
+class PublicTimelinePage extends StatefulWidget {
+  const PublicTimelinePage({Key? key}) : super(key: key);
+
+  @override
+  State<PublicTimelinePage> createState() => _PublicTimelinePageState();
+}
+
+class _PublicTimelinePageState extends State<PublicTimelinePage> {
+  final ScrollController _scrollController = ScrollController();
+  List<MastodonStatusModel> _statuses = [];
+  bool _isLoading = false;
+  int _page = 1; // For page-based pagination
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatuses();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // If scrolled to within 200px of the bottom, fetch more
+    if (_scrollController.position.pixels > _scrollController.position.maxScrollExtent - 200) {
+      _fetchStatuses();
+    }
+  }
+
+  Future<void> _fetchStatuses() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Adjust repository fetch call to include page or other pagination param
+      final newStatuses = await MastodonStatusRepository.fetchStatuses(/* page: _page */);
+      setState(() {
+        _page++;
+        _statuses.addAll(newStatuses);
+      });
+    } catch (e) {
+      debugPrint('Error fetching statuses: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshStatuses() async {
+    setState(() {
+      _statuses.clear();
+      _page = 1;
+    });
+    await _fetchStatuses();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+        title: const Text('Public Timeline'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text('Public Timeline'),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => ComposePage()));
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => ComposePage()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refreshStatuses,
+        child: ListView.builder(
+          controller: _scrollController,
+          itemCount: _statuses.length + 1,
+          itemBuilder: (context, index) {
+            if (index < _statuses.length) {
+              return MastodonStatusCard(status: _statuses[index]);
+            } else {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: _isLoading ? const CircularProgressIndicator() : const SizedBox.shrink(),
+                ),
+              );
+            }
           },
-          child: const Icon(Icons.add)),
-      body: ListView(
-        shrinkWrap: true,
-        children: [
-          FutureBuilder(
-              future: MastodonStatusRepository.fetchStatuses(),
-              builder: (context, snapshot) {
-                final statuses = snapshot.data ?? [];
-                return ListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  // Column is also a layout widget. It takes a list of children and
-                  // arranges them vertically. By default, it sizes itself to fit its
-                  // children horizontally, and tries to be as tall as its parent.
-                  //
-                  // Column has various properties to control how it sizes itself and
-                  // how it positions its children. Here we use mainAxisAlignment to
-                  // center the children vertically; the main axis here is the vertical
-                  // axis because Columns are vertical (the cross axis would be
-                  // horizontal).
-                  //
-                  // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-                  // action in the IDE, or press "p" in the console), to see the
-                  // wireframe for each widget.
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    const Text(
-                      'You have pushed the button this many times:',
-                    ),
-                    // GaleContainer(
-                    //     predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
-                    //     child: GaleTypography.h1(text: 'Hello, Gale!')),
-                    // GaleCircle(
-                    //   radius: 80.0,
-                    //   predicates: (style) => [style.bg.blue300],
-                    //   child: const Icon(Icons.add),
-                    // ),
-                    ...[...statuses.map((status) => MastodonStatusCard(status: status))]
-                  ],
-                );
-              }),
-        ],
+        ),
       ),
     );
   }
