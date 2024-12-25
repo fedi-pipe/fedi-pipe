@@ -2,6 +2,7 @@ import 'package:fedi_pipe/components/mastodon_status_card.dart';
 import 'package:fedi_pipe/main.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/pages/compose_page.dart';
+import 'package:fedi_pipe/pages/drafts_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -153,9 +154,12 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
               },
             ),
             ListTile(
-              title: const Text('Settings'),
+              title: const Text('drafts'),
               onTap: () {
-                Navigator.of(context).pushNamed('/settings');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DraftsPage()),
+                );
               },
             ),
           ],
