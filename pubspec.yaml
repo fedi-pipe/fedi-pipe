@@ -37,6 +37,7 @@ dependencies:
   html: ^0.15.4
   http: ^1.2.1
   solidart: ^1.5.4
+  sqflite: ^2.4.1
 
 dev_dependencies:
   flutter_test:
