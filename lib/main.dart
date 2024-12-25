@@ -3,6 +3,7 @@ import 'package:fedi_pipe/pages/compose_page.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
 import 'package:fedi_pipe/pages/notification_page.dart';
+import 'package:fedi_pipe/pages/public_timeline_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -115,107 +116,5 @@ class _MyHomePageState extends State<MyHomePage> {
       NotificationPage(),
       BookmarkPage(),
     ];
-  }
-}
-
-class PublicTimelinePage extends StatefulWidget {
-  const PublicTimelinePage({Key? key}) : super(key: key);
-
-  @override
-  State<PublicTimelinePage> createState() => _PublicTimelinePageState();
-}
-
-class _PublicTimelinePageState extends State<PublicTimelinePage> {
-  final ScrollController _scrollController = ScrollController();
-  List<MastodonStatusModel> _statuses = [];
-  bool _isLoading = false;
-  int _page = 1; // For page-based pagination
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchStatuses();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    // If scrolled to within 200px of the bottom, fetch more
-    if (_scrollController.position.pixels > _scrollController.position.maxScrollExtent - 200) {
-      _fetchStatuses();
-    }
-  }
-
-  Future<void> _fetchStatuses() async {
-    if (_isLoading) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Adjust repository fetch call to include page or other pagination param
-      final newStatuses = await MastodonStatusRepository.fetchStatuses(/* page: _page */);
-      setState(() {
-        _page++;
-        _statuses.addAll(newStatuses);
-      });
-    } catch (e) {
-      debugPrint('Error fetching statuses: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _refreshStatuses() async {
-    setState(() {
-      _statuses.clear();
-      _page = 1;
-    });
-    await _fetchStatuses();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Public Timeline'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => ComposePage()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: RefreshIndicator(
-        onRefresh: _refreshStatuses,
-        child: ListView.builder(
-          controller: _scrollController,
-          itemCount: _statuses.length + 1,
-          itemBuilder: (context, index) {
-            if (index < _statuses.length) {
-              return MastodonStatusCard(status: _statuses[index]);
-            } else {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: _isLoading ? const CircularProgressIndicator() : const SizedBox.shrink(),
-                ),
-              );
-            }
-          },
-        ),
-      ),
-    );
   }
 }
