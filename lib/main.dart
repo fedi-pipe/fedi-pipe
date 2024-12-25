@@ -1,4 +1,5 @@
 import 'package:fedi_pipe/components/mastodon_status_card.dart';
+import 'package:fedi_pipe/pages/compose_page.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
 import 'package:fedi_pipe/pages/notification_page.dart';
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        textTheme: TextTheme(headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold, color: Colors.black)),
+        textTheme:
+            TextTheme(headlineLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold, color: Colors.black)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -131,47 +133,51 @@ class PublicTimelinePage extends StatelessWidget {
         // the App.build method, and use it to set our appbar title.
         title: Text('Public Timeline'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: FutureBuilder(
-            future: MastodonStatusRepository.fetchStatuses(),
-            builder: (context, snapshot) {
-              final statuses = snapshot.data ?? [];
-              return ListView(
-                // Column is also a layout widget. It takes a list of children and
-                // arranges them vertically. By default, it sizes itself to fit its
-                // children horizontally, and tries to be as tall as its parent.
-                //
-                // Column has various properties to control how it sizes itself and
-                // how it positions its children. Here we use mainAxisAlignment to
-                // center the children vertically; the main axis here is the vertical
-                // axis because Columns are vertical (the cross axis would be
-                // horizontal).
-                //
-                // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-                // action in the IDE, or press "p" in the console), to see the
-                // wireframe for each widget.
-                shrinkWrap: true,
-                children: <Widget>[
-                  const Text(
-                    'You have pushed the button this many times:',
-                  ),
-                  // GaleContainer(
-                  //     predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
-                  //     child: GaleTypography.h1(text: 'Hello, Gale!')),
-                  // GaleCircle(
-                  //   radius: 80.0,
-                  //   predicates: (style) => [style.bg.blue300],
-                  //   child: const Icon(Icons.add),
-                  // ),
-                  ListView(
-                    shrinkWrap: true,
-                    children: [...statuses.map((status) => MastodonStatusCard(status: status))],
-                  )
-                ],
-              );
-            }),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => ComposePage()));
+          },
+          child: const Icon(Icons.add)),
+      body: ListView(
+        shrinkWrap: true,
+        children: [
+          FutureBuilder(
+              future: MastodonStatusRepository.fetchStatuses(),
+              builder: (context, snapshot) {
+                final statuses = snapshot.data ?? [];
+                return ListView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  // Column is also a layout widget. It takes a list of children and
+                  // arranges them vertically. By default, it sizes itself to fit its
+                  // children horizontally, and tries to be as tall as its parent.
+                  //
+                  // Column has various properties to control how it sizes itself and
+                  // how it positions its children. Here we use mainAxisAlignment to
+                  // center the children vertically; the main axis here is the vertical
+                  // axis because Columns are vertical (the cross axis would be
+                  // horizontal).
+                  //
+                  // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+                  // action in the IDE, or press "p" in the console), to see the
+                  // wireframe for each widget.
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    const Text(
+                      'You have pushed the button this many times:',
+                    ),
+                    // GaleContainer(
+                    //     predicates: (style) => [style.bg.red200, style.rounded.sm, style.shadow.xl],
+                    //     child: GaleTypography.h1(text: 'Hello, Gale!')),
+                    // GaleCircle(
+                    //   radius: 80.0,
+                    //   predicates: (style) => [style.bg.blue300],
+                    //   child: const Icon(Icons.add),
+                    // ),
+                    ...[...statuses.map((status) => MastodonStatusCard(status: status))]
+                  ],
+                );
+              }),
+        ],
       ),
     );
   }
