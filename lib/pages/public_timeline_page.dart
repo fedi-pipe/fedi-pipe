@@ -110,6 +110,14 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
       appBar: AppBar(
         title: const Text('Public Timeline'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: Builder(builder: (context) {
+          return IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          );
+        }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -118,6 +126,40 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: const Text('Fedi Pipe'),
+              decoration: BoxDecoration(),
+            ),
+            ListTile(
+              title: const Text('Public Timeline'),
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: const Text('Local Timeline'),
+              onTap: () {
+                Navigator.of(context).pushNamed('/local');
+              },
+            ),
+            ListTile(
+              title: const Text('Federated Timeline'),
+              onTap: () {
+                Navigator.of(context).pushNamed('/federated');
+              },
+            ),
+            ListTile(
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.of(context).pushNamed('/settings');
+              },
+            ),
+          ],
+        ),
       ),
       body: ListView.builder(
         controller: _scrollController,
