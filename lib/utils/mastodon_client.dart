@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 export 'package:http/http.dart' show Response;
 
@@ -16,9 +18,6 @@ class MastodonClient {
     };
     var urlWithParams = Uri.parse(url);
     urlWithParams = urlWithParams.replace(queryParameters: queryParameters);
-    print('--------');
-    print(urlWithParams);
-    print('--------');
     final response = await http.get(urlWithParams, headers: headers);
     return response;
   }
@@ -42,7 +41,7 @@ class MastodonClient {
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
-      body: body,
+      body: jsonEncode(body),
     );
 
     return response;

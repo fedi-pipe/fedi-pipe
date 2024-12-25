@@ -1,12 +1,12 @@
 class MastodonAccountModel {
   final String id;
   final String username;
-  final String acct;
-  final String displayName;
-  final String note;
-  final String url;
-  final String avatar;
-  final String header;
+  final String? acct;
+  final String? displayName;
+  final String? note;
+  final String? url;
+  final String? avatar;
+  final String? header;
   final int followersCount;
   final int followingCount;
   final int statusesCount;
@@ -52,22 +52,22 @@ class MastodonAccountModel {
 }
 
 class MastodonCardModel {
-  final String embedUrl;
-  final String description;
-  final String html;
-  final String type;
+  final String? embedUrl;
+  final String? description;
+  final String? html;
+  final String? type;
   final int height;
-  final String url;
-  final String title;
+  final String? url;
+  final String? title;
   final String? publishedAt;
   final int width;
   final String? authorName;
   final String? langauge;
-  final String providerName;
-  final String imageDescription;
+  final String? providerName;
+  final String? imageDescription;
   final String? image;
   final String? authorUrl;
-  final String blurhash;
+  final String? blurhash;
   final String? providerUrl;
 
   MastodonCardModel({

@@ -24,11 +24,16 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     return statuses;
   }
 
-  static Future<MastodonStatusModel> postStatus(String status) async {
-    final response = await Client.post('/api/v1/statuses', {'status': status});
-    final json = jsonDecode(response.body);
-    final newStatus = MastodonStatusModel.fromJson(json);
-
-    return newStatus;
+  static Future<void> postStatus(String status) async {
+    final body = {
+      'status': status,
+      'visibility': 'unlisted',
+      'media_ids': [],
+      'sensitive': false,
+      'spoiler_text': '',
+      'poll': null,
+      'language': 'ko',
+    };
+    final response = await Client.post('/api/v1/statuses', body);
   }
 }

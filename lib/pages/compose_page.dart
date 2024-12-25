@@ -33,7 +33,7 @@ class ComposePage extends StatelessWidget {
               onPressed: () {
                 // Post the status
                 print(_controller.text);
-                //MastodonStatusRepository.postStatus(_controller.text);
+                MastodonStatusRepository.postStatus(_controller.text);
 
                 Navigator.of(context).pop();
                 // Add a snackbar to show a message
