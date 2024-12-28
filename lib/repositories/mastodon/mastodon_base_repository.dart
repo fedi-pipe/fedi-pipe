@@ -4,8 +4,6 @@ typedef Client = MastodonBaseRepository;
 
 class MastodonBaseRepository {
   final MastodonClient? client;
-  static String endpointUrl = 'https://social.silicon.moe';
-  static String accessToken = 'xlqcUs_StCuiByXxYa20M2zpjxmGbWG4TL7sKdrXikU';
 
   static MastodonBaseRepository? _instance;
 
