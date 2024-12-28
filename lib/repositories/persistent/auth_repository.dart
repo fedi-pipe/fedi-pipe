@@ -4,6 +4,22 @@ import 'package:fedi_pipe/repositories/persistent/persistent_base_repository.dar
 class AuthRepository extends PersistentBaseRepository {
   static const authTable = 'auth';
 
+  Future<List<Auth>> availableAccounts() async {
+    final db = await open();
+    final auths = await db.query(authTable);
+    await db.close();
+
+    final result = auths.map((auth) {
+      final id = auth['id'] as int;
+      final instance = auth['instance'] as String;
+      final accessToken = auth['access_token'] as String;
+
+      return Auth(id: id, instance: instance, accessToken: accessToken);
+    }).toList();
+
+    return result;
+  }
+
   Future<void> saveAuth(String instance, String accessToken) async {
     final db = await open();
     final auth = await db.insert(authTable, {
@@ -13,6 +29,12 @@ class AuthRepository extends PersistentBaseRepository {
 
     await setActiveAuth(auth);
 
+    await db.close();
+  }
+
+  Future<void> deleteAuth(int id) async {
+    final db = await open();
+    await db.delete(authTable, where: 'id = ?', whereArgs: [id]);
     await db.close();
   }
 
