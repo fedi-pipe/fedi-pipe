@@ -1,17 +1,36 @@
 import 'dart:convert';
 
+import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:http/http.dart' as http;
 export 'package:http/http.dart' show Response;
 
 typedef HttpHeader = Map<String, String>;
 
 class MastodonClient {
-  final String endpointUrl;
-  final String accessToken;
+  Future<String?> getEndpointUrl() async {
+    AuthRepository authRepository = AuthRepository();
+    final auth = await authRepository.getAuth();
 
-  MastodonClient({required this.endpointUrl, required this.accessToken});
+    if (auth == null) {
+      return null;
+    }
+
+    return 'https://${auth.instance}';
+  }
+
+  Future<String?> getAccessToken() async {
+    AuthRepository authRepository = AuthRepository();
+    final auth = await authRepository.getAuth();
+
+    if (auth == null) {
+      return null;
+    }
+
+    return auth.accessToken;
+  }
 
   Future<http.Response> get(String url, {Map<String, String>? queryParameters, HttpHeader? additionalHeaders}) async {
+    final baseHeaders = await getBaseHeaders();
     final headers = {
       ...baseHeaders,
       ...?additionalHeaders,
@@ -26,14 +45,20 @@ class MastodonClient {
         'Content-Type': 'application/json',
       };
 
-  Map<String, String> get baseHeaders => accessToken.isEmpty
-      ? defaultHeaders
-      : {
-          ...defaultHeaders,
-          'Authorization': 'Bearer $accessToken',
-        };
+  Future<Map<String, String>> getBaseHeaders() async {
+    final accessToken = await getAccessToken();
+    if (accessToken == null) {
+      return defaultHeaders;
+    }
+
+    return {
+      ...defaultHeaders,
+      'Authorization': 'Bearer $accessToken',
+    };
+  }
 
   Future<http.Response> post(String url, Map<String, dynamic> body, {HttpHeader? additionalHeaders}) async {
+    final baseHeaders = await getBaseHeaders();
     final headers = {
       ...baseHeaders,
       ...?additionalHeaders,
@@ -48,6 +73,7 @@ class MastodonClient {
   }
 
   Future<http.Response> delete(String url, {HttpHeader? additionalHeaders}) async {
+    final baseHeaders = await getBaseHeaders();
     final headers = {
       ...baseHeaders,
       ...?additionalHeaders,
@@ -61,6 +87,7 @@ class MastodonClient {
   }
 
   Future<http.Response> put(String url, Map<String, dynamic> body, {HttpHeader? additionalHeaders}) async {
+    final baseHeaders = await getBaseHeaders();
     final headers = {
       ...baseHeaders,
       ...?additionalHeaders,
