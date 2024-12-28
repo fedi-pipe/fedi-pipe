@@ -24,10 +24,12 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
+      name: 'home',
       builder: (context, state) => MyHomePage(title: ""),
     ),
     GoRoute(
       path: '/add-token',
+      name: 'add-token',
       builder: (context, state) => AddTokenPage(),
     )
   ],
