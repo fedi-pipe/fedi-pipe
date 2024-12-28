@@ -51,6 +51,45 @@ class MastodonAccountModel {
   }
 }
 
+class MediaAttachmentModel {
+  final String? id;
+  final String? type;
+  final String? url;
+  final String? previewUrl;
+  final String? remoteUrl;
+  final String? textUrl;
+  final String? description;
+  final String? blurhash;
+
+  MediaAttachmentModel({
+    required this.id,
+    required this.type,
+    required this.url,
+    required this.previewUrl,
+    required this.remoteUrl,
+    required this.textUrl,
+    required this.description,
+    required this.blurhash,
+  });
+
+  factory MediaAttachmentModel.fromJson(Map<String, dynamic> json) {
+    return MediaAttachmentModel(
+      id: json['id'],
+      type: json['type'],
+      url: json['url'],
+      previewUrl: json['preview_url'],
+      remoteUrl: json['remote_url'],
+      textUrl: json['text_url'],
+      description: json['description'],
+      blurhash: json['blurhash'],
+    );
+  }
+
+  static List<MediaAttachmentModel> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => MediaAttachmentModel.fromJson(json)).toList();
+  }
+}
+
 class MastodonCardModel {
   final String? embedUrl;
   final String? description;
@@ -123,6 +162,7 @@ class MastodonStatusModel {
   final String accountAvatarUrl;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
+  List<MediaAttachmentModel> mediaAttachments = [];
 
   MastodonStatusModel({
     required this.id,
@@ -134,6 +174,7 @@ class MastodonStatusModel {
     required this.accountAvatarUrl,
     required this.account,
     this.card,
+    this.mediaAttachments = const [],
   });
 
   factory MastodonStatusModel.fromJson(Map<String, dynamic> json) {
@@ -149,6 +190,7 @@ class MastodonStatusModel {
       accountAvatarUrl: account['avatar'],
       card: card != null ? MastodonCardModel.fromJson(card) : null,
       account: MastodonAccountModel.fromJson(account),
+      mediaAttachments: MediaAttachmentModel.fromJsonList(json['media_attachments']),
     );
   }
 

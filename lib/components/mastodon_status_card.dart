@@ -48,6 +48,19 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                   );
                 }),
           ),
+          // 4 column grid for media attachments
+          if (widget.status.mediaAttachments.isNotEmpty)
+            GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+              ),
+              itemCount: widget.status.mediaAttachments.length,
+              itemBuilder: (context, index) {
+                final media = widget.status.mediaAttachments[index];
+                return Image.network(media.url!);
+              },
+            ),
         ],
       ),
     );
