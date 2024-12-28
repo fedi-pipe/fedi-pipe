@@ -5,6 +5,7 @@ import 'package:fedi_pipe/pages/compose_page.dart';
 import 'package:fedi_pipe/pages/drafts_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PublicTimelinePage extends StatefulWidget {
   const PublicTimelinePage({Key? key}) : super(key: key);
@@ -151,6 +152,12 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
               title: const Text('Federated Timeline'),
               onTap: () {
                 Navigator.of(context).pushNamed('/federated');
+              },
+            ),
+            ListTile(
+              title: const Text('Manage Accounts'),
+              onTap: () {
+                context.pushNamed('manage-accounts');
               },
             ),
             ListTile(

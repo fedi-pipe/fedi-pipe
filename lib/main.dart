@@ -1,3 +1,4 @@
+import 'package:fedi_pipe/pages/manage_accounts_page.dart';
 import 'package:fedi_pipe/pages/add_token_page.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
 import 'package:fedi_pipe/pages/notification_page.dart';
@@ -31,7 +32,12 @@ final _router = GoRouter(
       path: '/add-token',
       name: 'add-token',
       builder: (context, state) => AddTokenPage(),
-    )
+    ),
+    GoRoute(
+      path: '/manage-accounts',
+      name: 'manage-accounts',
+      builder: (context, state) => ManageAccountsPage(),
+    ),
   ],
 );
 
