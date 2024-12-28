@@ -9,7 +9,7 @@ class DomNodeRenderer {
 
   InlineSpan render() {
     if (node is TextNode) {
-      return TextSpan(text: (node as TextNode).text);
+      return TextSpan(text: (node as TextNode).text, style: TextStyle(overflow: TextOverflow.visible));
     }
 
     if (node is ElementNode) {
@@ -27,17 +27,20 @@ class DomNodeRenderer {
 
     // line break
     if (elementNode.tag == "br") {
-      return TextSpan(text: "\n");
+      return TextSpan(text: "\n", style: TextStyle(overflow: TextOverflow.visible));
     }
 
     // block elements
     if (blockElements.contains(elementNode.tag)) {
       return WidgetSpan(
         child: Container(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text.rich(TextSpan(children: children))],
-          ),
+          child: Text.rich(TextSpan(children: [
+            TextSpan(
+              text: "\n",
+              style: TextStyle(fontSize: 0, overflow: TextOverflow.visible),
+            ),
+            ...children
+          ])),
         ),
       );
     }
@@ -50,62 +53,62 @@ class DomNodeRenderer {
       case "a":
         return TextSpan(
           children: children,
-          style: TextStyle(color: Colors.blue),
+          style: TextStyle(color: Colors.blue, overflow: TextOverflow.visible),
         );
       case "p":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16, overflow: TextOverflow.visible),
         );
       case "h1":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 32),
+          style: TextStyle(fontSize: 32, overflow: TextOverflow.visible),
         );
       case "h2":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 24),
+          style: TextStyle(fontSize: 24, overflow: TextOverflow.visible),
         );
       case "h3":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(fontSize: 20, overflow: TextOverflow.visible),
         );
       case "h4":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 18, overflow: TextOverflow.visible),
         );
       case "h5":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16, overflow: TextOverflow.visible),
         );
       case "h6":
         return TextSpan(
           children: children,
-          style: TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14, overflow: TextOverflow.visible),
         );
       case "b":
         return TextSpan(
           children: children,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.visible),
         );
       case "i":
         return TextSpan(
           children: children,
-          style: TextStyle(fontStyle: FontStyle.italic),
+          style: TextStyle(fontStyle: FontStyle.italic, overflow: TextOverflow.visible),
         );
       case "u":
         return TextSpan(
           children: children,
-          style: TextStyle(decoration: TextDecoration.underline),
+          style: TextStyle(decoration: TextDecoration.underline, overflow: TextOverflow.visible),
         );
       case "s":
         return TextSpan(
           children: children,
-          style: TextStyle(decoration: TextDecoration.lineThrough),
+          style: TextStyle(decoration: TextDecoration.lineThrough, overflow: TextOverflow.visible),
         );
       case "fragment":
         return TextSpan(children: children);

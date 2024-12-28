@@ -19,6 +19,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
 
     return Card(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             leading: CircleAvatar(
@@ -35,7 +36,10 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return CircularProgressIndicator();
                   }
-                  return Text.rich(DomNodeRenderer(node: snapshot.data!).render());
+                  return Text.rich(
+                    DomNodeRenderer(node: snapshot.data!).render(),
+                    softWrap: true,
+                  );
                 }),
           ),
         ],
