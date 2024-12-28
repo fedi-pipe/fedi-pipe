@@ -1,4 +1,6 @@
+import 'package:fedi_pipe/components/dom_node_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
 
 class MastodonStatusCard extends StatefulWidget {
@@ -13,6 +15,8 @@ class MastodonStatusCard extends StatefulWidget {
 class _MastodonStatusCardState extends State<MastodonStatusCard> {
   @override
   Widget build(BuildContext context) {
+    final domNode = HTMLParser(widget.status.content).parse();
+
     return Card(
       child: Column(
         children: [
@@ -25,7 +29,14 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(widget.status.content),
+            child: FutureBuilder(
+                future: domNode,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return CircularProgressIndicator();
+                  }
+                  return Text.rich(DomNodeRenderer(node: snapshot.data!).render());
+                }),
           ),
         ],
       ),
