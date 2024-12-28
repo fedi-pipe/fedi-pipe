@@ -1,10 +1,8 @@
-import 'package:fedi_pipe/components/mastodon_status_card.dart';
-import 'package:fedi_pipe/pages/compose_page.dart';
-import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/pages/add_token_page.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
 import 'package:fedi_pipe/pages/notification_page.dart';
 import 'package:fedi_pipe/pages/public_timeline_page.dart';
-import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
+import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -14,11 +12,24 @@ void main() {
 }
 
 final _router = GoRouter(
+  redirect: (BuildContext context, GoRouterState state) async {
+    final authRepository = AuthRepository();
+    final auth = await authRepository.getAuth();
+    if (auth == null) {
+      return '/add-token';
+    }
+
+    return null;
+  },
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => MyHomePage(title: ""),
     ),
+    GoRoute(
+      path: '/add-token',
+      builder: (context, state) => AddTokenPage(),
+    )
   ],
 );
 
