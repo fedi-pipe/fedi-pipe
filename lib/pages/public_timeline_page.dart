@@ -171,7 +171,7 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
         itemBuilder: (context, index) {
           // If it's not the final "loading" widget, build a status card
           if (index < _statuses.length) {
-            return MastodonStatusCard(status: _statuses[index]);
+            return MastodonStatusCard(key: ValueKey(_statuses[index].id), status: _statuses[index]);
           } else {
             // Display a loader at the bottom if we're currently fetching
             return Padding(
