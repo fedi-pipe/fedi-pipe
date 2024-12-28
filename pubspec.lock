@@ -78,6 +78,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_solidart:
+    dependency: "direct main"
+    description:
+      name: flutter_solidart
+      sha256: "15a8aac40101d25e7645d61a08c9d4c44407bba11843dd95295f154c3a4f7b3f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.7.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
