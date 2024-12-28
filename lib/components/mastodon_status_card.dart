@@ -13,10 +13,16 @@ class MastodonStatusCard extends StatefulWidget {
 }
 
 class _MastodonStatusCardState extends State<MastodonStatusCard> {
+  late Future<DOMNode> domNode;
+
+  @override
+  void initState() {
+    super.initState();
+    domNode = HTMLParser(widget.status.content).parse();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final domNode = HTMLParser(widget.status.content).parse();
-
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
