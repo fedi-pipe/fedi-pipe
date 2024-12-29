@@ -73,7 +73,7 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
     try {
       if (direction == ScrollDirection.up) {
         // Load newer statuses (future)
-        final newStatuses = await MastodonStatusRepository.fetchStatuses(nextId: _nextId);
+        final newStatuses = await MastodonStatusRepository.fetchStatuses(nextId: _nextId, feedType: FeedType.public);
 
         if (newStatuses.isNotEmpty) {
           setState(() {
@@ -87,7 +87,8 @@ class _PublicTimelinePageState extends State<PublicTimelinePage> {
         } else {}
       } else {
         // Load older statuses (past)
-        final oldStatuses = await MastodonStatusRepository.fetchStatuses(previousId: _prevId);
+        final oldStatuses =
+            await MastodonStatusRepository.fetchStatuses(previousId: _prevId, feedType: FeedType.public);
 
         if (oldStatuses.isNotEmpty) {
           setState(() {

@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/mastodon_base_repository.dart';
 
+enum FeedType { public, home, local }
+
 class MastodonStatusRepository extends MastodonBaseRepository {
-  static Future<List<MastodonStatusModel>> fetchStatuses({String? previousId, String? nextId}) async {
+  static Future<List<MastodonStatusModel>> fetchStatuses(
+      {String? previousId, String? nextId, FeedType feedType = FeedType.home}) async {
     final queryParameters = <String, String>{};
     if (previousId != null) {
       queryParameters['max_id'] = previousId;
@@ -12,12 +15,17 @@ class MastodonStatusRepository extends MastodonBaseRepository {
       queryParameters['min_id'] = nextId;
     }
 
-    final response = await Client.get('/api/v1/timelines/public', queryParameters: queryParameters);
-    print("========");
-    print(response);
-    print(response.headers);
-    print(response.body);
-    print("========");
+    final path = switch (feedType) {
+      FeedType.public => '/api/v1/timelines/public',
+      FeedType.home => '/api/v1/timelines/home',
+      FeedType.local => '/api/v1/timelines/public',
+    };
+
+    if (feedType == FeedType.local) {
+      queryParameters['local'] = 'true';
+    }
+
+    final response = await Client.get(path, queryParameters: queryParameters);
     final json = jsonDecode(response.body);
     final statuses = MastodonStatusModel.fromJsonList(json);
 
