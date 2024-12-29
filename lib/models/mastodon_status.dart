@@ -155,8 +155,9 @@ class MastodonCardModel {
 class MastodonStatusModel {
   final String id;
   final String content;
-  final String url;
+  final String? url;
   final String createdAt;
+  final String acct;
   final String accountDisplayName;
   final String accountUsername;
   final String accountAvatarUrl;
@@ -169,6 +170,7 @@ class MastodonStatusModel {
     required this.content,
     required this.url,
     required this.createdAt,
+    required this.acct,
     required this.accountDisplayName,
     required this.accountUsername,
     required this.accountAvatarUrl,
@@ -185,6 +187,7 @@ class MastodonStatusModel {
       content: json['content'],
       url: json['url'],
       createdAt: json['created_at'],
+      acct: account['acct'],
       accountDisplayName: account['display_name'],
       accountUsername: account['username'],
       accountAvatarUrl: account['avatar'],

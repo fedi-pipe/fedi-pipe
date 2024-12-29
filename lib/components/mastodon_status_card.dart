@@ -31,7 +31,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
             leading: CircleAvatar(
               foregroundImage: NetworkImage(widget.status.accountAvatarUrl),
             ),
-            title: Text(widget.status.accountDisplayName),
+            title: Text("${widget.status.accountDisplayName} (@${widget.status.acct})"),
             subtitle: Text(widget.status.createdAt),
           ),
           Padding(
