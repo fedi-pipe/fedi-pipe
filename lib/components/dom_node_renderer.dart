@@ -22,6 +22,21 @@ class DomNodeRenderer {
     return WidgetSpan(child: Container());
   }
 
+  List<dynamic> _printTextNodes(List<DOMNode> elementNode) {
+    final texts = elementNode.map((e) {
+      if (e is TextNode) {
+        return (e as TextNode).text;
+      }
+
+      if (e is ElementNode) {
+        return _printTextNodes((e as ElementNode).children);
+      }
+
+      return "";
+    }).toList();
+    return texts;
+  }
+
   InlineSpan wrapElement(ElementNode elementNode, List<InlineSpan> children) {
     final style = styledElement(elementNode, children);
 
@@ -29,6 +44,12 @@ class DomNodeRenderer {
     if (elementNode.tag == "br") {
       return TextSpan(text: "\n", style: TextStyle(overflow: TextOverflow.visible));
     }
+
+    //print([
+    //  elementNode.tag,
+    //  elementNode.attributes,
+    //  _printTextNodes(elementNode.children),
+    //]);
 
     // block elements
     if (blockElements.contains(elementNode.tag)) {
@@ -50,9 +71,12 @@ class DomNodeRenderer {
 
   InlineSpan styledElement(ElementNode elementNode, List<InlineSpan> children) {
     switch (elementNode.tag) {
+      // TODO: We need to inspect why this tag is not including text node
       case "a":
+        String href = '';
+        if (elementNode.attributes!.containsKey('href')) href = elementNode.attributes!['href']!;
         return TextSpan(
-          children: children,
+          text: href,
           style: TextStyle(color: Colors.blue, overflow: TextOverflow.visible),
         );
       case "p":
