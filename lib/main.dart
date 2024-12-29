@@ -1,3 +1,4 @@
+import 'package:fedi_pipe/pages/home_timeline_page.dart';
 import 'package:fedi_pipe/pages/manage_accounts_page.dart';
 import 'package:fedi_pipe/pages/add_token_page.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
@@ -125,6 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: null,
       bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          unselectedItemColor: Theme.of(context).colorScheme.onSurface,
           currentIndex: index,
           onTap: (int index) {
             setState(() {
@@ -133,6 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
           },
           items: [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.public), label: 'public'),
             BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notification'),
             BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Bookmark'),
           ]),
@@ -142,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> get pages {
     return [
+      HomeTimelinePage(),
       PublicTimelinePage(),
       NotificationPage(),
       BookmarkPage(),
