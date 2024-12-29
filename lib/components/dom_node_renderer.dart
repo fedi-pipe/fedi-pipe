@@ -1,6 +1,7 @@
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DomNodeRenderer {
   final DOMNode node;
@@ -75,10 +76,15 @@ class DomNodeRenderer {
       case "a":
         String href = '';
         if (elementNode.attributes!.containsKey('href')) href = elementNode.attributes!['href']!;
-        return TextSpan(
-          text: href,
-          style: TextStyle(color: Colors.blue, overflow: TextOverflow.visible),
-        );
+        return WidgetSpan(
+            child: GestureDetector(
+                onTap: () {
+                  launchUrl(Uri.parse(href));
+                },
+                child: Text.rich(TextSpan(
+                  text: href,
+                  style: TextStyle(color: Colors.blue, overflow: TextOverflow.visible),
+                ))));
       case "p":
         return TextSpan(
           children: children,
