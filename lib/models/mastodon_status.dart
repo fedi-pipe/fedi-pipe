@@ -161,6 +161,8 @@ class MastodonStatusModel {
   final String accountDisplayName;
   final String accountUsername;
   final String accountAvatarUrl;
+
+  final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
   List<MediaAttachmentModel> mediaAttachments = [];
@@ -175,6 +177,7 @@ class MastodonStatusModel {
     required this.accountUsername,
     required this.accountAvatarUrl,
     required this.account,
+    this.reblog,
     this.card,
     this.mediaAttachments = const [],
   });
@@ -188,6 +191,7 @@ class MastodonStatusModel {
       url: json['url'],
       createdAt: json['created_at'],
       acct: account['acct'],
+      reblog: json['reblog'] != null ? MastodonStatusModel.fromJson(json['reblog']) : null,
       accountDisplayName: account['display_name'],
       accountUsername: account['username'],
       accountAvatarUrl: account['avatar'],

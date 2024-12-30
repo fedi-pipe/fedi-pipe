@@ -23,17 +23,30 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
 
   @override
   Widget build(BuildContext context) {
+    final status = widget.status.reblog ?? widget.status;
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             leading: CircleAvatar(
-              foregroundImage: NetworkImage(widget.status.accountAvatarUrl),
+              foregroundImage: NetworkImage(status.accountAvatarUrl),
             ),
-            title: Text("${widget.status.accountDisplayName} (@${widget.status.acct})"),
-            subtitle: Text(widget.status.createdAt),
+            title: Text("${status.accountDisplayName} (@${status.acct})"),
+            subtitle: GestureDetector(
+                onTap: () {
+                  print(status.card?.title);
+                },
+                child: Text(status.createdAt)),
           ),
+          if (status.reblog != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Boosted by @${widget.status.acct}",
+                textAlign: TextAlign.right,
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FutureBuilder(
@@ -49,15 +62,15 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                 }),
           ),
           // 4 column grid for media attachments
-          if (widget.status.mediaAttachments.isNotEmpty)
+          if (status.mediaAttachments.isNotEmpty)
             GridView.builder(
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
               ),
-              itemCount: widget.status.mediaAttachments.length,
+              itemCount: status.mediaAttachments.length,
               itemBuilder: (context, index) {
-                final media = widget.status.mediaAttachments[index];
+                final media = status.mediaAttachments[index];
                 return Image.network(media.previewUrl!);
               },
             ),
