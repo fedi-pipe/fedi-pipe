@@ -14,17 +14,18 @@ class MastodonStatusCard extends StatefulWidget {
 }
 
 class _MastodonStatusCardState extends State<MastodonStatusCard> {
+  late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
 
   @override
   void initState() {
     super.initState();
-    domNode = HTMLParser(widget.status.content).parse();
+    status = widget.status.reblog ?? widget.status;
+    domNode = HTMLParser(status.content).parse();
   }
 
   @override
   Widget build(BuildContext context) {
-    final status = widget.status.reblog ?? widget.status;
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
