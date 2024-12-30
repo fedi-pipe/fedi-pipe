@@ -74,6 +74,42 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                 return Image.network(media.previewUrl!);
               },
             ),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            IconButton(
+              icon: Row(
+                children: [
+                  Icon(Icons.comment),
+                  Padding(padding: EdgeInsets.only(left: 8)),
+                  Text(status.repliesCount.toString()),
+                ],
+              ),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Row(
+                children: [
+                  Icon(Icons.repeat),
+                  Padding(padding: EdgeInsets.only(left: 8)),
+                  Text(status.reblogsCount.toString()),
+                ],
+              ),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Row(
+                children: [
+                  Icon(Icons.favorite),
+                  Padding(padding: EdgeInsets.only(left: 8)),
+                  Text(status.favouritesCount.toString()),
+                ],
+              ),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(Icons.bookmark),
+              onPressed: () {},
+            ),
+          ])
         ],
       ),
     );

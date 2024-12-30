@@ -162,6 +162,10 @@ class MastodonStatusModel {
   final String accountUsername;
   final String accountAvatarUrl;
 
+  int reblogsCount = 0;
+  int favouritesCount = 0;
+  int repliesCount = 0;
+
   final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
@@ -178,6 +182,9 @@ class MastodonStatusModel {
     required this.accountAvatarUrl,
     required this.account,
     this.reblog,
+    this.favouritesCount = 0,
+    this.reblogsCount = 0,
+    this.repliesCount = 0,
     this.card,
     this.mediaAttachments = const [],
   });
@@ -192,6 +199,9 @@ class MastodonStatusModel {
       createdAt: json['created_at'],
       acct: account['acct'],
       reblog: json['reblog'] != null ? MastodonStatusModel.fromJson(json['reblog']) : null,
+      favouritesCount: json['favourites_count'],
+      reblogsCount: json['reblogs_count'],
+      repliesCount: json['replies_count'],
       accountDisplayName: account['display_name'],
       accountUsername: account['username'],
       accountAvatarUrl: account['avatar'],
