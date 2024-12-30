@@ -74,6 +74,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                 return Image.network(media.previewUrl!);
               },
             ),
+          if (widget.status.card != null) _renderCard(),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             IconButton(
               icon: Row(
@@ -111,6 +112,31 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
             ),
           ])
         ],
+      ),
+    );
+  }
+
+  Padding _renderCard() {
+    final card = widget.status.card!;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        child: Column(
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
+              ),
+              title: Text(card.title!),
+              subtitle: Text(card.description!),
+            ),
+            if (card.url != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(status.card!.url!),
+              ),
+          ],
+        ),
       ),
     );
   }
