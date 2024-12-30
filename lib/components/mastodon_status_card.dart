@@ -41,13 +41,18 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                 },
                 child: Text(status.createdAt)),
           ),
-          if (status.reblog != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Boosted by @${widget.status.acct}",
-                textAlign: TextAlign.right,
-              ),
+          if (widget.status.reblog != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Boosted by @${widget.status.acct}",
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
             ),
           Padding(
             padding: const EdgeInsets.all(8.0),
