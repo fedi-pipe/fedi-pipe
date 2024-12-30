@@ -1,5 +1,6 @@
 import 'package:fedi_pipe/components/dom_node_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +36,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
             title: Text("${status.accountDisplayName} (@${status.acct})"),
             subtitle: GestureDetector(
                 onTap: () {
-                  print(status.card?.title);
+                  MastodonStatusRepository.fetchStatus(widget.status.id);
                 },
                 child: Text(status.createdAt)),
           ),

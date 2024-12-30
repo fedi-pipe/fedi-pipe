@@ -6,6 +6,15 @@ import 'package:fedi_pipe/repositories/mastodon/mastodon_base_repository.dart';
 enum FeedType { public, home, local }
 
 class MastodonStatusRepository extends MastodonBaseRepository {
+  static Future<MastodonStatusModel> fetchStatus(String id) async {
+    final response = await Client.get('/api/v1/statuses/$id');
+    final json = jsonDecode(response.body);
+    print(json);
+    final status = MastodonStatusModel.fromJson(json);
+
+    return status;
+  }
+
   static Future<List<MastodonStatusModel>> fetchStatuses(
       {String? previousId, String? nextId, FeedType feedType = FeedType.home}) async {
     final queryParameters = <String, String>{};
