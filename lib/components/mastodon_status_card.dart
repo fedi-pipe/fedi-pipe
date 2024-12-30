@@ -58,7 +58,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               itemCount: widget.status.mediaAttachments.length,
               itemBuilder: (context, index) {
                 final media = widget.status.mediaAttachments[index];
-                return Image.network(media.url!);
+                return Image.network(media.previewUrl!);
               },
             ),
         ],
