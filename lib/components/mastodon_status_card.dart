@@ -178,6 +178,9 @@ class MastodonAccountAvatar extends StatelessWidget {
           width: 250,
           arrowWidth: 20,
           arrowDyOffset: 10,
+          constraints: BoxConstraints(
+            maxHeight: 400,
+          ),
         );
       },
       child: CircleAvatar(
