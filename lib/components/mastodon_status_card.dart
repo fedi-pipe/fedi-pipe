@@ -78,7 +78,19 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               itemCount: status.mediaAttachments.length,
               itemBuilder: (context, index) {
                 final media = status.mediaAttachments[index];
-                return Image.network(media.previewUrl!);
+                return GestureDetector(
+                    onTap: () {
+                      final previewUrl = media.previewUrl!;
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            child: InteractiveViewer(child: Image.network(previewUrl)),
+                          );
+                        },
+                      );
+                    },
+                    child: Image.network(media.previewUrl!));
               },
             ),
           if (widget.status.card != null) _renderCard(),
