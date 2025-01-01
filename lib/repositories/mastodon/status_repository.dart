@@ -15,6 +15,33 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     return status;
   }
 
+  static Future<List<MastodonStatusModel>> fetchBookmarks() async {
+    final response = await Client.get('/api/v1/bookmarks');
+    final json = jsonDecode(response.body);
+    print(json);
+    final statuses = MastodonStatusModel.fromJsonList(json);
+
+    return statuses;
+  }
+
+  static Future<List<MastodonStatusModel>> fetchFavourites() async {
+    final response = await Client.get('/api/v1/favourites');
+    final json = jsonDecode(response.body);
+    final statuses = MastodonStatusModel.fromJsonList(json);
+
+    return statuses;
+  }
+
+  static Future<List<MastodonStatusModel>> fetchCollection(collectionType) async {
+    if (collectionType == 'favourites') {
+      return fetchFavourites();
+    } else if (collectionType == 'bookmarks') {
+      return fetchBookmarks();
+    }
+
+    return [];
+  }
+
   static Future<List<MastodonStatusModel>> fetchStatuses(
       {String? previousId, String? nextId, FeedType feedType = FeedType.home}) async {
     final queryParameters = <String, String>{};
