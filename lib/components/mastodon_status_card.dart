@@ -3,6 +3,7 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MastodonStatusCard extends StatefulWidget {
   const MastodonStatusCard({super.key, required this.status});
@@ -123,26 +124,32 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
     );
   }
 
-  Padding _renderCard() {
+  Widget _renderCard() {
     final card = widget.status.card!;
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        child: Column(
-          children: [
-            ListTile(
-              leading: CircleAvatar(
-                foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
+    return GestureDetector(
+      onTap: () {
+        final uri = Uri.parse(card.url!);
+        launchUrl(uri);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
+                ),
+                title: Text(card.title!),
+                subtitle: Text(card.description!),
               ),
-              title: Text(card.title!),
-              subtitle: Text(card.description!),
-            ),
-            if (card.url != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(status.card!.url!),
-              ),
-          ],
+              if (card.url != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(status.card!.url!),
+                ),
+            ],
+          ),
         ),
       ),
     );
