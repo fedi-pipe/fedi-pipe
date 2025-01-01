@@ -85,7 +85,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                         context: context,
                         builder: (context) {
                           return Dialog(
-                            child: InteractiveViewer(child: Image.network(previewUrl)),
+                            child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
                           );
                         },
                       );
