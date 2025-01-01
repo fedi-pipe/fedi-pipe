@@ -183,7 +183,7 @@ class MastodonAccountAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final account = widget.status.account;
+    final account = status.account;
     return GestureDetector(
       onLongPress: () {
         showPopover(
