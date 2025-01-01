@@ -166,6 +166,8 @@ class MastodonStatusModel {
   int favouritesCount = 0;
   int repliesCount = 0;
 
+  bool bookmarked = false;
+
   final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
@@ -182,6 +184,7 @@ class MastodonStatusModel {
     required this.accountAvatarUrl,
     required this.account,
     this.reblog,
+    this.bookmarked = false,
     this.favouritesCount = 0,
     this.reblogsCount = 0,
     this.repliesCount = 0,
@@ -198,6 +201,7 @@ class MastodonStatusModel {
       url: json['url'],
       createdAt: json['created_at'],
       acct: account['acct'],
+      bookmarked: json['bookmarked'],
       reblog: json['reblog'] != null ? MastodonStatusModel.fromJson(json['reblog']) : null,
       favouritesCount: json['favourites_count'],
       reblogsCount: json['reblogs_count'],

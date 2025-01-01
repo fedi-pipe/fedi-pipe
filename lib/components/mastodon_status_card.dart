@@ -114,8 +114,12 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               onPressed: () {},
             ),
             IconButton(
-              icon: Icon(Icons.bookmark),
-              onPressed: () {},
+              icon: Icon(status.bookmarked ? Icons.bookmark_added : Icons.bookmark_add
+                  //Icons.bookmark,
+                  ),
+              onPressed: () {
+                print(status.bookmarked);
+              },
             ),
           ])
         ],
