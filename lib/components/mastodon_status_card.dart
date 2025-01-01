@@ -3,6 +3,7 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
+import 'package:popover/popover.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MastodonStatusCard extends StatefulWidget {
@@ -32,9 +33,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: CircleAvatar(
-              foregroundImage: NetworkImage(status.accountAvatarUrl),
-            ),
+            leading: MastodonAccountAvatar(status: status, widget: widget),
             title: Text("${status.accountDisplayName} (@${status.acct})"),
             subtitle: GestureDetector(
                 onTap: () {
@@ -151,6 +150,114 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MastodonAccountAvatar extends StatelessWidget {
+  const MastodonAccountAvatar({
+    super.key,
+    required this.status,
+    required this.widget,
+  });
+
+  final MastodonStatusModel status;
+  final MastodonStatusCard widget;
+
+  @override
+  Widget build(BuildContext context) {
+    final account = widget.status.account;
+    return GestureDetector(
+      onLongPress: () {
+        showPopover(
+          context: context,
+          bodyBuilder: (context) => MastodonAccountPreview(account: account),
+          onPop: () {},
+          direction: PopoverDirection.top,
+          width: 250,
+          arrowWidth: 20,
+          arrowDyOffset: 10,
+        );
+      },
+      child: CircleAvatar(
+        foregroundImage: NetworkImage(status.accountAvatarUrl),
+      ),
+    );
+  }
+}
+
+class MastodonAccountPreview extends StatefulWidget {
+  const MastodonAccountPreview({
+    super.key,
+    required this.account,
+  });
+
+  final MastodonAccountModel account;
+
+  @override
+  State<MastodonAccountPreview> createState() => _MastodonAccountPreviewState();
+}
+
+class _MastodonAccountPreviewState extends State<MastodonAccountPreview> {
+  late Future<DOMNode> domNode;
+
+  @override
+  void initState() {
+    super.initState();
+    domNode = HTMLParser(widget.account.note ?? "").parse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                foregroundImage: NetworkImage(widget.account.avatar!),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text("@${widget.account.acct!}"),
+          Text(widget.account.username),
+          SizedBox(height: 8),
+          FutureBuilder(
+            future: domNode,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return CircularProgressIndicator();
+              }
+              return Text.rich(
+                DomNodeRenderer(node: snapshot.data!).render(),
+                softWrap: true,
+              );
+            },
+          ),
+          SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+            ),
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              final data = [widget.account.followersCount, widget.account.followingCount, widget.account.statusesCount];
+              final labels = ["Followers", "Following", "Statuses"];
+              return Column(
+                children: [
+                  Text(data[index].toString()),
+                  Text(labels[index]),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
