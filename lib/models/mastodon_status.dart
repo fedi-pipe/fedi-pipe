@@ -44,9 +44,9 @@ class MastodonAccountModel {
       followersCount: json['followers_count'],
       followingCount: json['following_count'],
       statusesCount: json['statuses_count'],
-      locked: json['locked'],
-      bot: json['bot'],
-      discoverable: json['discoverable'],
+      locked: json['locked'] ?? false,
+      bot: json['bot'] ?? false,
+      discoverable: json['discoverable'] ?? false,
     );
   }
 }
