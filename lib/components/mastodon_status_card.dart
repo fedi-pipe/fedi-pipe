@@ -18,6 +18,7 @@ class MastodonStatusCard extends StatefulWidget {
 
 class _MastodonStatusCardState extends State<MastodonStatusCard> {
   late final bookmarkConfettiController = ConfettiController();
+  late final favouriteConfettiController = ConfettiController();
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
 
@@ -122,19 +123,44 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               ),
               onPressed: () {},
             ),
-            IconButton(
-              color: status.favourited ? primaryColor : null,
-              icon: Row(
-                children: [
-                  Icon(Icons.favorite),
-                  Padding(padding: EdgeInsets.only(left: 8)),
-                  Text(status.favouritesCount.toString(),
-                      style: TextStyle(
-                          color: status.favourited ? primaryColor : null,
-                          fontWeight: status.favourited ? FontWeight.bold : null)),
-                ],
-              ),
-              onPressed: () {},
+            Stack(
+              children: [
+                Positioned(
+                  left: 20,
+                  bottom: 10,
+                  child: Container(
+                      width: 0,
+                      height: 0,
+                      child: Confetti(
+                          particleBuilder: (index) => Emoji(
+                                emoji: "❤️",
+                              ),
+                          controller: favouriteConfettiController,
+                          options: ConfettiOptions(
+                            particleCount: 20,
+                            startVelocity: 20,
+                            spread: 30,
+                            gravity: 0.7,
+                            y: 0,
+                          ))),
+                ),
+                IconButton(
+                  color: status.favourited ? primaryColor : null,
+                  icon: Row(
+                    children: [
+                      Icon(Icons.favorite),
+                      Padding(padding: EdgeInsets.only(left: 8)),
+                      Text(status.favouritesCount.toString(),
+                          style: TextStyle(
+                              color: status.favourited ? primaryColor : null,
+                              fontWeight: status.favourited ? FontWeight.bold : null)),
+                    ],
+                  ),
+                  onPressed: () {
+                    favouriteConfettiController.launch();
+                  },
+                ),
+              ],
             ),
             Stack(
               children: [
