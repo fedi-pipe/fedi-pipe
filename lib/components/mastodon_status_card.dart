@@ -3,6 +3,7 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:popover/popover.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,6 +17,7 @@ class MastodonStatusCard extends StatefulWidget {
 }
 
 class _MastodonStatusCardState extends State<MastodonStatusCard> {
+  late final bookmarkConfettiController = ConfettiController();
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
 
@@ -134,14 +136,38 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               ),
               onPressed: () {},
             ),
-            IconButton(
-              color: status.bookmarked ? primaryColor : null,
-              icon: Icon(status.bookmarked ? Icons.bookmark_added : Icons.bookmark_add
-                  //Icons.bookmark,
-                  ),
-              onPressed: () {
-                print(status.bookmarked);
-              },
+            Stack(
+              children: [
+                Positioned(
+                  left: 20,
+                  bottom: 10,
+                  child: Container(
+                      width: 0,
+                      height: 0,
+                      child: Confetti(
+                          particleBuilder: (index) => Emoji(
+                                emoji: "🔖",
+                              ),
+                          controller: bookmarkConfettiController,
+                          options: ConfettiOptions(
+                            particleCount: 20,
+                            startVelocity: 20,
+                            spread: 30,
+                            gravity: 0.7,
+                            y: 0,
+                          ))),
+                ),
+                IconButton(
+                  color: status.bookmarked ? primaryColor : null,
+                  icon: Icon(status.bookmarked ? Icons.bookmark_added : Icons.bookmark_add
+                      //Icons.bookmark,
+                      ),
+                  onPressed: () {
+                    bookmarkConfettiController.launch();
+                    print(status.bookmarked);
+                  },
+                ),
+              ],
             ),
           ])
         ],
