@@ -28,6 +28,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,26 +107,35 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               onPressed: () {},
             ),
             IconButton(
+              color: status.reblogged ? primaryColor : null,
               icon: Row(
                 children: [
                   Icon(Icons.repeat),
                   Padding(padding: EdgeInsets.only(left: 8)),
-                  Text(status.reblogsCount.toString()),
+                  Text(status.reblogsCount.toString(),
+                      style: TextStyle(
+                          color: status.reblogged ? primaryColor : null,
+                          fontWeight: status.reblogged ? FontWeight.bold : null)),
                 ],
               ),
               onPressed: () {},
             ),
             IconButton(
+              color: status.favourited ? primaryColor : null,
               icon: Row(
                 children: [
                   Icon(Icons.favorite),
                   Padding(padding: EdgeInsets.only(left: 8)),
-                  Text(status.favouritesCount.toString()),
+                  Text(status.favouritesCount.toString(),
+                      style: TextStyle(
+                          color: status.favourited ? primaryColor : null,
+                          fontWeight: status.favourited ? FontWeight.bold : null)),
                 ],
               ),
               onPressed: () {},
             ),
             IconButton(
+              color: status.bookmarked ? primaryColor : null,
               icon: Icon(status.bookmarked ? Icons.bookmark_added : Icons.bookmark_add
                   //Icons.bookmark,
                   ),

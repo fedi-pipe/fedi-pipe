@@ -167,6 +167,8 @@ class MastodonStatusModel {
   int repliesCount = 0;
 
   bool bookmarked = false;
+  bool reblogged = false;
+  bool favourited = false;
 
   final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
@@ -185,6 +187,8 @@ class MastodonStatusModel {
     required this.account,
     this.reblog,
     this.bookmarked = false,
+    this.reblogged = false,
+    this.favourited = false,
     this.favouritesCount = 0,
     this.reblogsCount = 0,
     this.repliesCount = 0,
@@ -195,6 +199,7 @@ class MastodonStatusModel {
   factory MastodonStatusModel.fromJson(Map<String, dynamic> json) {
     final account = json['account'];
     final card = json['card'];
+    print(json['bookmarked']);
     return MastodonStatusModel(
       id: json['id'],
       content: json['content'],
@@ -202,6 +207,8 @@ class MastodonStatusModel {
       createdAt: json['created_at'],
       acct: account['acct'],
       bookmarked: json['bookmarked'],
+      reblogged: json['reblogged'],
+      favourited: json['favourited'],
       reblog: json['reblog'] != null ? MastodonStatusModel.fromJson(json['reblog']) : null,
       favouritesCount: json['favourites_count'],
       reblogsCount: json['reblogs_count'],
