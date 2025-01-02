@@ -42,6 +42,7 @@ dependencies:
   go_router: ^14.6.2
   url_launcher: ^6.3.1
   popover: ^0.3.1
+  flutter_confetti: ^0.3.4
 
 dev_dependencies:
   flutter_test:
