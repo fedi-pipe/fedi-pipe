@@ -22,11 +22,19 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
 
+  late bool isBoomarked;
+  late bool isFavourited;
+  late bool isReblogged;
+
   @override
   void initState() {
     super.initState();
     status = widget.status.reblog ?? widget.status;
     domNode = HTMLParser(status.content).parse();
+
+    isBoomarked = status.bookmarked;
+    isFavourited = status.favourited;
+    isReblogged = status.reblogged;
   }
 
   @override
@@ -77,18 +85,21 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
               },
             ),
             IconButton(
-              color: status.reblogged ? primaryColor : null,
+              color: isReblogged ? primaryColor : null,
               icon: Row(
                 children: [
                   Icon(Icons.repeat),
                   Padding(padding: EdgeInsets.only(left: 8)),
                   Text(status.reblogsCount.toString(),
                       style: TextStyle(
-                          color: status.reblogged ? primaryColor : null,
-                          fontWeight: status.reblogged ? FontWeight.bold : null)),
+                          color: isReblogged ? primaryColor : null, fontWeight: isReblogged ? FontWeight.bold : null)),
                 ],
               ),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  isReblogged = !isReblogged;
+                });
+              },
             ),
             Stack(
               children: [
@@ -112,18 +123,21 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                           ))),
                 ),
                 IconButton(
-                  color: status.favourited ? primaryColor : null,
+                  color: isFavourited ? primaryColor : null,
                   icon: Row(
                     children: [
                       Icon(Icons.favorite),
                       Padding(padding: EdgeInsets.only(left: 8)),
                       Text(status.favouritesCount.toString(),
                           style: TextStyle(
-                              color: status.favourited ? primaryColor : null,
-                              fontWeight: status.favourited ? FontWeight.bold : null)),
+                              color: isFavourited ? primaryColor : null,
+                              fontWeight: isFavourited ? FontWeight.bold : null)),
                     ],
                   ),
                   onPressed: () {
+                    setState(() {
+                      isFavourited = !isFavourited;
+                    });
                     favouriteConfettiController.launch();
                   },
                 ),
@@ -151,12 +165,15 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                           ))),
                 ),
                 IconButton(
-                  color: status.bookmarked ? primaryColor : null,
-                  icon: Icon(status.bookmarked ? Icons.bookmark_added : Icons.bookmark_add
+                  color: isBoomarked ? primaryColor : null,
+                  icon: Icon(isBoomarked ? Icons.bookmark_added : Icons.bookmark_add
                       //Icons.bookmark,
                       ),
                   onPressed: () {
                     bookmarkConfettiController.launch();
+                    setState(() {
+                      isBoomarked = !isBoomarked;
+                    });
                     print(status.bookmarked);
                   },
                 ),
