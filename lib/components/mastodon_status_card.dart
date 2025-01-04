@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fedi_pipe/components/html_renderer.dart';
+import 'package:fedi_pipe/extensions/string.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
@@ -205,17 +206,26 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
         padding: const EdgeInsets.all(8.0),
         child: Card(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ListTile(
-                leading: CircleAvatar(
-                  foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
+                leading: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
+                    ),
+                  ],
                 ),
-                title: Text(card.title!),
-                subtitle: Text(card.description!),
+                title: Text(
+                  card.title!,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(card.description!.clamp(140)),
               ),
               if (card.url != null)
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(status.card!.url!),
                 ),
             ],
