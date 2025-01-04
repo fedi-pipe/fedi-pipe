@@ -72,7 +72,9 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                   Text(status.repliesCount.toString()),
                 ],
               ),
-              onPressed: () {},
+              onPressed: () {
+                showDialog(context: context, builder: (ctx) => ReplyDialogBody(status: status));
+              },
             ),
             IconButton(
               color: status.reblogged ? primaryColor : null,
@@ -257,11 +259,9 @@ class MastodonAccountAvatar extends StatelessWidget {
   const MastodonAccountAvatar({
     super.key,
     required this.status,
-    required this.widget,
   });
 
   final MastodonStatusModel status;
-  final MastodonStatusCard widget;
 
   @override
   Widget build(BuildContext context) {
@@ -361,5 +361,71 @@ class _MastodonAccountPreviewState extends State<MastodonAccountPreview> {
         ],
       ),
     );
+  }
+}
+
+class ReplyDialogBody extends StatefulWidget {
+  final MastodonStatusModel status;
+  const ReplyDialogBody({super.key, required this.status});
+
+  @override
+  State<ReplyDialogBody> createState() => _ReplyDialogBodyState();
+}
+
+class _ReplyDialogBodyState extends State<ReplyDialogBody> {
+  final TextEditingController _controller = TextEditingController();
+
+  late final MastodonStatusModel status;
+  late Future<DOMNode> domNode;
+
+  @override
+  void initState() {
+    super.initState();
+    status = widget.status.reblog ?? widget.status;
+    domNode = HTMLParser(status.content).parse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[100]),
+            child: Card(
+                shadowColor: Colors.transparent,
+                child: MastodonStatusCardBody(status: status, originalStatus: widget.status, domNode: domNode))),
+        SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
+          padding: EdgeInsets.all(8),
+          child: Column(
+            children: [
+              Card(
+                color: Colors.transparent,
+                shadowColor: Colors.transparent,
+                borderOnForeground: false,
+                surfaceTintColor: Colors.transparent,
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(hintText: "Reply"),
+                  maxLines: 3,
+                ),
+              ),
+              SizedBox(height: 16),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                ElevatedButton(
+                    onPressed: () {
+                      MastodonStatusRepository.replyToStatus(status.id, _controller.text);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Reply")),
+              ])
+            ],
+          ),
+        )
+      ]),
+    ));
   }
 }
