@@ -68,7 +68,13 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     return statuses;
   }
 
-  static Future<void> postStatus(String status) async {
+  static Future<void> replyToStatus(String statusId, String content) async {
+    await postStatus(content, additionalPayload: {
+      'in_reply_to_id': statusId,
+    });
+  }
+
+  static Future<void> postStatus(String status, {Map<String, dynamic>? additionalPayload}) async {
     final body = {
       'status': status,
       'visibility': 'unlisted',
@@ -77,6 +83,7 @@ class MastodonStatusRepository extends MastodonBaseRepository {
       'spoiler_text': '',
       'poll': null,
       'language': 'ko',
+      ...?additionalPayload,
     };
     final response = await Client.post('/api/v1/statuses', body);
   }
