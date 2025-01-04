@@ -87,4 +87,12 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     };
     final response = await Client.post('/api/v1/statuses', body);
   }
+
+  static Future<void> bookmarkStatus(String statusId) async {
+    await Client.post('/api/v1/statuses/$statusId/bookmark', {});
+  }
+
+  static Future<void> unbookmarkStatus(String statusId) async {
+    await Client.post('/api/v1/statuses/$statusId/unbookmark', {});
+  }
 }

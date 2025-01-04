@@ -22,7 +22,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
 
-  late bool isBoomarked;
+  late bool isBookmarked;
   late bool isFavourited;
   late bool isReblogged;
 
@@ -32,7 +32,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
     status = widget.status.reblog ?? widget.status;
     domNode = HTMLParser(status.content).parse();
 
-    isBoomarked = status.bookmarked;
+    isBookmarked = status.bookmarked;
     isFavourited = status.favourited;
     isReblogged = status.reblogged;
   }
@@ -165,15 +165,24 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                           ))),
                 ),
                 IconButton(
-                  color: isBoomarked ? primaryColor : null,
-                  icon: Icon(isBoomarked ? Icons.bookmark_added : Icons.bookmark_add
+                  color: isBookmarked ? primaryColor : null,
+                  icon: Icon(isBookmarked ? Icons.bookmark_added : Icons.bookmark_add
                       //Icons.bookmark,
                       ),
                   onPressed: () {
-                    bookmarkConfettiController.launch();
-                    setState(() {
-                      isBoomarked = !isBoomarked;
-                    });
+                    if (isBookmarked) {
+                      setState(() {
+                        isBookmarked = false;
+                      });
+                      MastodonStatusRepository.unbookmarkStatus(status.id);
+                    } else {
+                      setState(() {
+                        isBookmarked = true;
+                      });
+                      MastodonStatusRepository.bookmarkStatus(status.id);
+                      bookmarkConfettiController.launch();
+                    }
+
                     print(status.bookmarked);
                   },
                 ),
