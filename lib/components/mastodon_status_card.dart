@@ -1,4 +1,6 @@
-import 'package:fedi_pipe/components/dom_node_renderer.dart';
+import 'dart:convert';
+
+import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
@@ -20,7 +22,6 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   late final bookmarkConfettiController = ConfettiController();
   late final favouriteConfettiController = ConfettiController();
   late final MastodonStatusModel status;
-  late Future<DOMNode> domNode;
 
   late bool isBookmarked;
   late bool isFavourited;
@@ -30,7 +31,6 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   void initState() {
     super.initState();
     status = widget.status.reblog ?? widget.status;
-    domNode = HTMLParser(status.content).parse();
 
     isBookmarked = status.bookmarked;
     isFavourited = status.favourited;
@@ -44,7 +44,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MastodonStatusCardBody(status: status, originalStatus: widget.status, domNode: domNode),
+          MastodonStatusCardBody(status: status, originalStatus: widget.status),
           // 4 column grid for media attachments
           if (status.mediaAttachments.isNotEmpty)
             GridView.builder(
@@ -231,12 +231,10 @@ class MastodonStatusCardBody extends StatelessWidget {
     super.key,
     required this.status,
     required this.originalStatus,
-    required this.domNode,
   });
 
   final MastodonStatusModel status;
   final MastodonStatusModel originalStatus;
-  final Future<DOMNode> domNode;
 
   @override
   Widget build(BuildContext context) {
@@ -245,6 +243,18 @@ class MastodonStatusCardBody extends StatelessWidget {
         leading: MastodonAccountAvatar(status: status),
         title: Text("${status.accountDisplayName} (@${status.acct})"),
         subtitle: GestureDetector(
+            onDoubleTap: () {
+              showDialog(
+                  context: context,
+                  builder: (ctx) => Container(
+                      height: 200,
+                      color: Colors.white,
+                      child: ListView(
+                        children: [
+                          Text(jsonEncode(status.content)),
+                        ],
+                      )));
+            },
             onTap: () {
               MastodonStatusRepository.fetchStatus(originalStatus.id);
             },
@@ -265,17 +275,7 @@ class MastodonStatusCardBody extends StatelessWidget {
         ),
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: FutureBuilder(
-            future: domNode,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return CircularProgressIndicator();
-              }
-              return Text.rich(
-                DomNodeRenderer(node: snapshot.data!).render(),
-                softWrap: true,
-              );
-            }),
+        child: HtmlRenderer(html: status.content),
       )
     ]);
   }
@@ -354,18 +354,7 @@ class _MastodonAccountPreviewState extends State<MastodonAccountPreview> {
           Text("@${widget.account.acct!}"),
           Text(widget.account.username),
           SizedBox(height: 8),
-          FutureBuilder(
-            future: domNode,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return CircularProgressIndicator();
-              }
-              return Text.rich(
-                DomNodeRenderer(node: snapshot.data!).render(),
-                softWrap: true,
-              );
-            },
-          ),
+          HtmlRenderer(html: widget.account.note!),
           SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
@@ -421,7 +410,7 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[100]),
             child: Card(
                 shadowColor: Colors.transparent,
-                child: MastodonStatusCardBody(status: status, originalStatus: widget.status, domNode: domNode))),
+                child: MastodonStatusCardBody(status: status, originalStatus: widget.status))),
         SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
