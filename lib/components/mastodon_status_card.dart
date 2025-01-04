@@ -36,42 +36,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            leading: MastodonAccountAvatar(status: status, widget: widget),
-            title: Text("${status.accountDisplayName} (@${status.acct})"),
-            subtitle: GestureDetector(
-                onTap: () {
-                  MastodonStatusRepository.fetchStatus(widget.status.id);
-                },
-                child: Text(status.createdAt)),
-          ),
-          if (widget.status.reblog != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Boosted by @${widget.status.acct}",
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ],
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FutureBuilder(
-                future: domNode,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return CircularProgressIndicator();
-                  }
-                  return Text.rich(
-                    DomNodeRenderer(node: snapshot.data!).render(),
-                    softWrap: true,
-                  );
-                }),
-          ),
+          MastodonStatusCardBody(status: status, originalStatus: widget.status, domNode: domNode),
           // 4 column grid for media attachments
           if (status.mediaAttachments.isNotEmpty)
             GridView.builder(
@@ -230,6 +195,61 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
         ),
       ),
     );
+  }
+}
+
+class MastodonStatusCardBody extends StatelessWidget {
+  const MastodonStatusCardBody({
+    super.key,
+    required this.status,
+    required this.originalStatus,
+    required this.domNode,
+  });
+
+  final MastodonStatusModel status;
+  final MastodonStatusModel originalStatus;
+  final Future<DOMNode> domNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      ListTile(
+        leading: MastodonAccountAvatar(status: status),
+        title: Text("${status.accountDisplayName} (@${status.acct})"),
+        subtitle: GestureDetector(
+            onTap: () {
+              MastodonStatusRepository.fetchStatus(originalStatus.id);
+            },
+            child: Text(status.createdAt)),
+      ),
+      if (originalStatus.reblog != null)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Boosted by @${originalStatus.acct}",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder(
+            future: domNode,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return CircularProgressIndicator();
+              }
+              return Text.rich(
+                DomNodeRenderer(node: snapshot.data!).render(),
+                softWrap: true,
+              );
+            }),
+      )
+    ]);
   }
 }
 
