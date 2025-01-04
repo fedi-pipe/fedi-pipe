@@ -214,7 +214,7 @@ class MastodonStatusCardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
       ListTile(
         leading: MastodonAccountAvatar(status: status),
         title: Text("${status.accountDisplayName} (@${status.acct})"),
