@@ -10,6 +10,15 @@ class HtmlRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     return HtmlWidget(
       html,
+      customStylesBuilder: (element) {
+        if (element.localName == 'code') {
+          return {
+            'color': 'green',
+            'font-size': 'medium',
+            'margin-left': '2em',
+          };
+        }
+      },
       customWidgetBuilder: (element) {
         if (element.localName == 'a') {
           return GestureDetector(
