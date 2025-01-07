@@ -21,13 +21,17 @@ class HtmlRenderer extends StatelessWidget {
       },
       customWidgetBuilder: (element) {
         if (element.localName == 'a') {
-          return GestureDetector(
-            onTap: () async {
-              final url = element.attributes['href'];
-              final uri = Uri.parse(url!);
-              launchUrl(uri);
-            },
-            child: Text(element.text, style: TextStyle(color: Colors.blue)),
+          return InlineCustomWidget(
+            child: GestureDetector(
+              onTap: () async {
+                final url = element.attributes['href'];
+                final uri = Uri.parse(url!);
+                launchUrl(uri);
+              },
+              child: Text(element.text,
+                  style: TextStyle(
+                      color: Colors.blue, decoration: TextDecoration.underline, decorationColor: Colors.blue)),
+            ),
           );
         }
       },
