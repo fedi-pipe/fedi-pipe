@@ -88,6 +88,14 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     final response = await Client.post('/api/v1/statuses', body);
   }
 
+  static Future<void> favouriteStatus(String statusId) async {
+    await Client.post('/api/v1/statuses/$statusId/favourite', {});
+  }
+
+  static Future<void> unfavouriteStatus(String statusId) async {
+    await Client.post('/api/v1/statuses/$statusId/unfavourite', {});
+  }
+
   static Future<void> bookmarkStatus(String statusId) async {
     await Client.post('/api/v1/statuses/$statusId/bookmark', {});
   }

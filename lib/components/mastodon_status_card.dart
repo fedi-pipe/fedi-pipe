@@ -28,6 +28,9 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   late bool isFavourited;
   late bool isReblogged;
 
+  late int favouriteCount;
+  late int reblogCount;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,9 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
     isBookmarked = status.bookmarked;
     isFavourited = status.favourited;
     isReblogged = status.reblogged;
+
+    favouriteCount = status.favouritesCount;
+    reblogCount = status.reblogsCount;
   }
 
   @override
@@ -129,17 +135,27 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                     children: [
                       Icon(Icons.favorite),
                       Padding(padding: EdgeInsets.only(left: 8)),
-                      Text(status.favouritesCount.toString(),
+                      Text(favouriteCount.toString(),
                           style: TextStyle(
                               color: isFavourited ? primaryColor : null,
                               fontWeight: isFavourited ? FontWeight.bold : null)),
                     ],
                   ),
                   onPressed: () {
-                    setState(() {
-                      isFavourited = !isFavourited;
-                    });
-                    favouriteConfettiController.launch();
+                    if (isFavourited) {
+                      setState(() {
+                        isFavourited = false;
+                        favouriteCount--;
+                      });
+                      MastodonStatusRepository.unfavouriteStatus(status.id);
+                    } else {
+                      setState(() {
+                        isFavourited = true;
+                        favouriteCount++;
+                      });
+                      MastodonStatusRepository.favouriteStatus(status.id);
+                      favouriteConfettiController.launch();
+                    }
                   },
                 ),
               ],
@@ -183,8 +199,6 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
                       MastodonStatusRepository.bookmarkStatus(status.id);
                       bookmarkConfettiController.launch();
                     }
-
-                    print(status.bookmarked);
                   },
                 ),
               ],
