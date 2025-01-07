@@ -1,3 +1,4 @@
+import 'package:fedi_pipe/pages/favourite_page.dart';
 import 'package:fedi_pipe/pages/home_timeline_page.dart';
 import 'package:fedi_pipe/pages/manage_accounts_page.dart';
 import 'package:fedi_pipe/pages/add_token_page.dart';
@@ -138,6 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.public), label: 'public'),
             BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notification'),
+            BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourite'),
             BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Bookmark'),
           ]),
       body: pages[index],
@@ -149,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
       HomeTimelinePage(),
       PublicTimelinePage(),
       NotificationPage(),
+      FavouritePage(),
       BookmarkPage(),
     ];
   }
