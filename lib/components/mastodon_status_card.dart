@@ -412,45 +412,57 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[100]),
-            child: Card(
-                shadowColor: Colors.transparent,
-                child: MastodonStatusCardBody(status: status, originalStatus: widget.status))),
-        SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
-          padding: EdgeInsets.all(8),
-          child: Column(
-            children: [
-              Card(
-                color: Colors.transparent,
-                shadowColor: Colors.transparent,
-                borderOnForeground: false,
-                surfaceTintColor: Colors.transparent,
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(hintText: "Reply"),
-                  maxLines: 3,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.of(context).pop();
+      },
+      child: SingleChildScrollView(
+        child: Container(
+            child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GestureDetector(
+            onTap: () {},
+            behavior: HitTestBehavior.translucent,
+            child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+              Container(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[100]),
+                  child: Card(
+                      shadowColor: Colors.transparent,
+                      child: MastodonStatusCardBody(status: status, originalStatus: widget.status))),
+              SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    Card(
+                      color: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      borderOnForeground: false,
+                      surfaceTintColor: Colors.transparent,
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(hintText: "Reply"),
+                        maxLines: 3,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      ElevatedButton(
+                          onPressed: () {
+                            MastodonStatusRepository.replyToStatus(status.id, _controller.text);
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Reply")),
+                    ])
+                  ],
                 ),
-              ),
-              SizedBox(height: 16),
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                ElevatedButton(
-                    onPressed: () {
-                      MastodonStatusRepository.replyToStatus(status.id, _controller.text);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("Reply")),
-              ])
-            ],
+              )
+            ]),
           ),
-        )
-      ]),
-    ));
+        )),
+      ),
+    );
   }
 }
