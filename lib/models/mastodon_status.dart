@@ -32,6 +32,7 @@ class MastodonAccountModel {
   });
 
   factory MastodonAccountModel.fromJson(Map<String, dynamic> json) {
+    print(["Account", json]);
     return MastodonAccountModel(
       id: json['id'],
       username: json['username'],
@@ -170,6 +171,8 @@ class MastodonStatusModel {
   bool reblogged = false;
   bool favourited = false;
 
+  final dynamic json;
+
   final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
@@ -198,6 +201,7 @@ class MastodonStatusModel {
     this.card,
     this.mediaAttachments = const [],
     this.mentions = const [],
+    this.json,
   });
 
   factory MastodonStatusModel.fromJson(Map<String, dynamic> json) {
@@ -224,6 +228,7 @@ class MastodonStatusModel {
       account: MastodonAccountModel.fromJson(account),
       mentions: MastodonStatusMentionModel.fromJsonList(json['mentions']),
       mediaAttachments: MediaAttachmentModel.fromJsonList(json['media_attachments']),
+      json: json,
     );
   }
 

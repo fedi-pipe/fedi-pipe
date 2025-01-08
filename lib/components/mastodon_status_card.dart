@@ -275,7 +275,7 @@ class MastodonStatusCardBody extends StatelessWidget {
                       color: Colors.white,
                       child: ListView(
                         children: [
-                          Text(jsonEncode(status.content)),
+                          Text(jsonEncode(status.json)),
                         ],
                       )));
             },
