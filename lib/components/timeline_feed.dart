@@ -90,6 +90,7 @@ class _TimelineFeedState extends State<TimelineFeed> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      cacheExtent: 5000,
       controller: _scrollController,
       itemCount: _statuses.length + 1,
       itemBuilder: (context, index) {
