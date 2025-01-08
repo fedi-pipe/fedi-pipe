@@ -412,7 +412,7 @@ class ReplyDialogBody extends StatefulWidget {
 }
 
 class _ReplyDialogBodyState extends State<ReplyDialogBody> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
 
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
@@ -422,6 +422,9 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
     super.initState();
     status = widget.status.reblog ?? widget.status;
     domNode = HTMLParser(status.content).parse();
+
+    final text = "@${status.account.acct} ";
+    _controller = TextEditingController(text: text);
   }
 
   @override
