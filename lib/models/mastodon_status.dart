@@ -237,7 +237,7 @@ class MastodonStatusModel {
   }
 
   List<String> replyMentions() {
-    return ["@${acct}", ...mentions.map((mention) => '@${mention.username}').toList()];
+    return ["@${acct}", ...mentions.map((mention) => '@${mention.acct}').toList()];
   }
 }
 
