@@ -413,6 +413,7 @@ class ReplyDialogBody extends StatefulWidget {
 
 class _ReplyDialogBodyState extends State<ReplyDialogBody> {
   late final TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
 
   late final MastodonStatusModel status;
   late Future<DOMNode> domNode;
@@ -425,6 +426,8 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
 
     final text = "@${status.account.acct} ";
     _controller = TextEditingController(text: text);
+
+    _focusNode.requestFocus();
   }
 
   @override
@@ -459,6 +462,7 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
                       borderOnForeground: false,
                       surfaceTintColor: Colors.transparent,
                       child: TextField(
+                        focusNode: _focusNode,
                         controller: _controller,
                         decoration: InputDecoration(hintText: "Reply"),
                         maxLines: 3,
