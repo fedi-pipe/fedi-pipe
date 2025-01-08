@@ -173,6 +173,9 @@ class MastodonStatusModel {
   final MastodonStatusModel? reblog;
   final MastodonCardModel? card;
   final MastodonAccountModel account;
+
+  List<MastodonStatusMentionModel> mentions;
+
   List<MediaAttachmentModel> mediaAttachments = [];
 
   MastodonStatusModel({
@@ -194,6 +197,7 @@ class MastodonStatusModel {
     this.repliesCount = 0,
     this.card,
     this.mediaAttachments = const [],
+    this.mentions = const [],
   });
 
   factory MastodonStatusModel.fromJson(Map<String, dynamic> json) {
@@ -218,11 +222,40 @@ class MastodonStatusModel {
       accountAvatarUrl: account['avatar'],
       card: card != null ? MastodonCardModel.fromJson(card) : null,
       account: MastodonAccountModel.fromJson(account),
+      mentions: MastodonStatusMentionModel.fromJsonList(json['mentions']),
       mediaAttachments: MediaAttachmentModel.fromJsonList(json['media_attachments']),
     );
   }
 
   static List<MastodonStatusModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => MastodonStatusModel.fromJson(json)).toList();
+  }
+
+  List<String> replyMentions() {
+    return ["@${acct}", ...mentions.map((mention) => '@${mention.username}').toList()];
+  }
+}
+
+class MastodonStatusMentionModel {
+  final String id;
+  final String acct;
+  final String username;
+
+  MastodonStatusMentionModel({
+    required this.id,
+    required this.acct,
+    required this.username,
+  });
+
+  factory MastodonStatusMentionModel.fromJson(Map<String, dynamic> json) {
+    return MastodonStatusMentionModel(
+      id: json['id'],
+      acct: json['acct'],
+      username: json['username'],
+    );
+  }
+
+  static List<MastodonStatusMentionModel> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => MastodonStatusMentionModel.fromJson(json)).toList();
   }
 }

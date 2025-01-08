@@ -424,7 +424,7 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
     status = widget.status.reblog ?? widget.status;
     domNode = HTMLParser(status.content).parse();
 
-    final text = "@${status.account.acct} ";
+    final text = "${status.replyMentions().join(' ')} ";
     _controller = TextEditingController(text: text);
 
     _focusNode.requestFocus();
