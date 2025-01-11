@@ -44,7 +44,6 @@ class _StatusCollectionFeedState extends State<StatusCollectionFeed> {
   }
 
   void _onScroll() {
-    return;
     final position = _scrollController.position;
     final pixels = position.pixels;
     final maxScroll = position.maxScrollExtent;
@@ -69,13 +68,15 @@ class _StatusCollectionFeedState extends State<StatusCollectionFeed> {
       _isLoading = true;
     });
 
-    final nextId = direction == ScrollDirection.up ? _statuses.firstOrNull?.id : null;
-    final previousId = direction == ScrollDirection.down ? _statuses.lastOrNull?.id : null;
+    final nextId = direction == ScrollDirection.up ? _nextId : null;
+    final previousId = direction == ScrollDirection.down ? _prevId : null;
 
-    final statuses = await MastodonStatusRepository.fetchCollection(
+    final pagination = await MastodonStatusRepository.fetchCollection(
       widget.collectionType,
+      previousId: previousId,
+      nextId: nextId,
     );
-
+    final statuses = pagination.items!;
     setState(() {
       if (direction == ScrollDirection.up) {
         _statuses = [...statuses, ..._statuses];
@@ -83,6 +84,14 @@ class _StatusCollectionFeedState extends State<StatusCollectionFeed> {
         _statuses = [..._statuses, ...statuses];
       }
       _isLoading = false;
+
+      if (pagination.nextId != null) {
+        _nextId = pagination.nextId;
+      }
+
+      if (pagination.previousId != null) {
+        _prevId = pagination.previousId;
+      }
     });
   }
 

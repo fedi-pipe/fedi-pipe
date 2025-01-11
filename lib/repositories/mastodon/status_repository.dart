@@ -5,6 +5,34 @@ import 'package:fedi_pipe/repositories/mastodon/mastodon_base_repository.dart';
 
 enum FeedType { public, home, local }
 
+class PaginationResult<T> {
+  String? previousId;
+  String? nextId;
+  List<T>? items;
+
+  PaginationResult({this.previousId, this.nextId, this.items = const []});
+
+  PaginationResult.parseLinkHeader(String linkHeader) {
+    final links = linkHeader.split(', ');
+
+    for (final link in links) {
+      final parts = link.split('; ');
+      final url = parts[0].substring(1, parts[0].length - 1);
+      final rel = parts[1].substring(5, parts[1].length - 1);
+
+      if (rel == 'next') {
+        this.previousId = Uri.parse(url).queryParameters['max_id'];
+      } else if (rel == 'prev') {
+        this.nextId = Uri.parse(url).queryParameters['min_id'];
+      }
+    }
+  }
+}
+
+/*  Example Link header:
+  link: <https://social.silicon.moe/api/v2/notifications?exclude_types%5B%5D=follow_request&grouped_types%5B%5D=favourite&grouped_types%5B%5D=reblog&grouped_types%5B%5D=follow&max_id=172698>; rel="next", <https://social.silicon.moe/api/v2/notifications?exclude_types%5B%5D=follow_request&grouped_types%5B%5D=favourite&grouped_types%5B%5D=reblog&grouped_types%5B%5D=follow&min_id=173515>; rel="prev"
+*/
+
 class MastodonStatusRepository extends MastodonBaseRepository {
   static Future<MastodonStatusModel> fetchStatus(String id) async {
     final response = await Client.get('/api/v1/statuses/$id');
@@ -15,31 +43,68 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     return status;
   }
 
-  static Future<List<MastodonStatusModel>> fetchBookmarks() async {
-    final response = await Client.get('/api/v1/bookmarks');
+  static Future<PaginationResult<MastodonStatusModel>> fetchBookmarks({
+    String? previousId,
+    String? nextId,
+  }) async {
+    final additionalQueryParameters = <String, String>{};
+    if (previousId != null) {
+      additionalQueryParameters['max_id'] = previousId;
+    } else if (nextId != null) {
+      additionalQueryParameters['min_id'] = nextId;
+    }
+    final response = await Client.get('/api/v1/bookmarks', queryParameters: additionalQueryParameters);
     final json = jsonDecode(response.body);
     print(json);
     final statuses = MastodonStatusModel.fromJsonList(json);
 
-    return statuses;
+    final linkHeader = response.headers['link'];
+    var pagination = PaginationResult<MastodonStatusModel>.parseLinkHeader(linkHeader!);
+    pagination.items = statuses;
+
+    return pagination;
   }
 
-  static Future<List<MastodonStatusModel>> fetchFavourites() async {
-    final response = await Client.get('/api/v1/favourites');
+  static Future<PaginationResult<MastodonStatusModel>> fetchFavourites({
+    String? perviousId,
+    String? nextId,
+  }) async {
+    final additionalQueryParameters = <String, String>{
+      if (perviousId != null) 'max_id': perviousId,
+      if (nextId != null) 'min_id': nextId,
+    };
+    final response = await Client.get('/api/v1/favourites', queryParameters: additionalQueryParameters);
     final json = jsonDecode(response.body);
     final statuses = MastodonStatusModel.fromJsonList(json);
 
-    return statuses;
+    final linkHeader = response.headers['link'];
+    if (linkHeader == null) {
+      return PaginationResult(items: statuses);
+    }
+    var pagination = PaginationResult<MastodonStatusModel>.parseLinkHeader(linkHeader!);
+    pagination.items = statuses;
+
+    return pagination;
   }
 
-  static Future<List<MastodonStatusModel>> fetchCollection(collectionType) async {
+  static Future<PaginationResult<MastodonStatusModel>> fetchCollection(
+    collectionType, {
+    String? previousId,
+    String? nextId,
+  }) async {
     if (collectionType == 'favourites') {
-      return fetchFavourites();
+      return fetchFavourites(
+        perviousId: previousId,
+        nextId: nextId,
+      );
     } else if (collectionType == 'bookmarks') {
-      return fetchBookmarks();
+      return fetchBookmarks(
+        previousId: previousId,
+        nextId: nextId,
+      );
     }
 
-    return [];
+    return PaginationResult();
   }
 
   static Future<List<MastodonStatusModel>> fetchStatuses(
