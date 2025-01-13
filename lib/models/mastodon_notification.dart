@@ -69,10 +69,10 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 
 enum NotificationFeedType {
   all,
-  mentions,
-  favourites,
-  reblogs,
-  follows,
+  mention,
+  favourite,
+  reblog,
+  follow,
 }
 
 class MastodonNotificationModel {

@@ -30,17 +30,17 @@ class MastodonNotificationRepository extends MastodonBaseRepository {
     switch (feedType) {
       case NotificationFeedType.all:
         break;
-      case NotificationFeedType.mentions:
-        queryParameters['types[]'] = 'mentions';
+      case NotificationFeedType.mention:
+        queryParameters['types[]'] = 'mention';
         break;
-      case NotificationFeedType.favourites:
-        queryParameters['types[]'] = 'favourites';
+      case NotificationFeedType.favourite:
+        queryParameters['types[]'] = 'favourite';
         break;
-      case NotificationFeedType.reblogs:
-        queryParameters['types[]'] = 'reblogs';
+      case NotificationFeedType.reblog:
+        queryParameters['types[]'] = 'reblog';
         break;
-      case NotificationFeedType.follows:
-        queryParameters['types[]'] = 'follows';
+      case NotificationFeedType.follow:
+        queryParameters['types[]'] = 'follow';
         break;
     }
 
