@@ -269,8 +269,35 @@ class MastodonStatusCardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      if (originalStatus.reblog != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "Boosted by @${originalStatus.acct}",
+                textAlign: TextAlign.right,
+              ),
+            ],
+          ),
+        ),
       ListTile(
-        leading: MastodonAccountAvatar(status: status),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            MastodonAccountAvatar(status: status),
+            if (originalStatus.reblog != null)
+              Positioned(
+                right: -8,
+                bottom: -8,
+                child: CircleAvatar(
+                  radius: 16,
+                  foregroundImage: NetworkImage(originalStatus.accountAvatarUrl),
+                ),
+              ),
+          ],
+        ),
         title: Text("${status.accountDisplayName} (@${status.acct})"),
         subtitle: GestureDetector(
             onDoubleTap: () {
@@ -290,19 +317,6 @@ class MastodonStatusCardBody extends StatelessWidget {
             },
             child: Text(status.createdAt)),
       ),
-      if (originalStatus.reblog != null)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Boosted by @${originalStatus.acct}",
-                textAlign: TextAlign.right,
-              ),
-            ),
-          ],
-        ),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: HtmlRenderer(html: status.content),
@@ -337,8 +351,9 @@ class MastodonAccountAvatar extends StatelessWidget {
           ),
         );
       },
-      child: CircleAvatar(
-        foregroundImage: NetworkImage(status.accountAvatarUrl),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(status.accountAvatarUrl),
       ),
     );
   }
