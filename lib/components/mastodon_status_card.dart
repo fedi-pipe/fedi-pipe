@@ -222,15 +222,21 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              ListTile(
-                leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      foregroundImage: card.image != null ? NetworkImage(card.image!) : null,
-                    ),
-                  ],
+              if (card.image != null)
+                Image.network(
+                  card.image!,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
                 ),
+              ListTile(
+                leading: (card.image == null)
+                    ? Container(
+                        width: 50,
+                        height: 50,
+                        child: Icon(Icons.link),
+                      )
+                    : null,
                 title: Text(
                   card.title!,
                   overflow: TextOverflow.ellipsis,
