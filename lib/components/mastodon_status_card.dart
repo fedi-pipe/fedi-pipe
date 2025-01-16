@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fedi_pipe/components/html_renderer.dart';
+import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
 import 'package:fedi_pipe/extensions/string.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
@@ -337,6 +338,9 @@ class MastodonAccountAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final account = status.account;
     return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(context: context, builder: (ctx) => MastodonProfileBottomSheet(account: account));
+      },
       onLongPress: () {
         showPopover(
           context: context,
