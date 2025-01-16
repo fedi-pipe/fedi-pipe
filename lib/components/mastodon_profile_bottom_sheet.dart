@@ -1,6 +1,18 @@
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/repositories/mastodon/account_repository.dart';
 import 'package:flutter/material.dart';
+
+void showMastodonProfileBottomSheet(BuildContext context, String acct) {
+  MastodonAccountRepository.lookUpAccount(acct).then((account) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return MastodonProfileBottomSheet(account: account);
+      },
+    );
+  });
+}
 
 class MastodonProfileBottomSheet extends StatelessWidget {
   final MastodonAccountModel account;
