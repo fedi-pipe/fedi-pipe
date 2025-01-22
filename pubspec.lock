@@ -112,6 +112,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.2"
+  fluttertagger:
+    dependency: "direct main"
+    description:
+      name: fluttertagger
+      sha256: "3df0132bdd431a7279da78ea70500ea1e767fa093f43f32785b757c10c6a0fcc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   go_router:
     dependency: "direct main"
     description:
