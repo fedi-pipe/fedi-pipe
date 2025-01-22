@@ -14,6 +14,10 @@ class MastodonAccountModel {
   final bool bot;
   final bool discoverable;
 
+  String toString() {
+    return "@${acct!}";
+  }
+
   MastodonAccountModel({
     required this.id,
     required this.username,
