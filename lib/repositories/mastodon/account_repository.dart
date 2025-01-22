@@ -11,4 +11,12 @@ class MastodonAccountRepository extends MastodonBaseRepository {
 
     return account;
   }
+
+  static Future<List<MastodonAccountModel>> searchAccounts(String query) async {
+    final response = await Client.get('/api/v1/accounts/search', queryParameters: {'q': query});
+    final json = jsonDecode(response.body);
+    final accounts = (json as List).map((account) => MastodonAccountModel.fromJson(account)).toList();
+
+    return accounts;
+  }
 }
