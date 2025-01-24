@@ -1,5 +1,6 @@
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/pages/profile_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/account_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -30,9 +31,14 @@ class MastodonProfileBottomSheet extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(account.avatar!),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfilePage(account: account)));
+                },
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(account.avatar!),
+                ),
               ),
               SizedBox(width: 8),
               Expanded(
