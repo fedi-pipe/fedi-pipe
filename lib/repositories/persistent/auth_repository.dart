@@ -47,6 +47,15 @@ class AuthRepository extends PersistentBaseRepository {
 
   Future<Auth?> getAuth() async {
     final db = await open();
+    // if table not exists, create it
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $authTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        instance TEXT NOT NULL,
+        access_token TEXT NOT NULL,
+        active INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
     final auth = await db.query(authTable, where: 'active = 1');
     await db.close();
 
