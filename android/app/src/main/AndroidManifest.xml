@@ -29,6 +29,8 @@
 	            <category android:name="android.intent.category.DEFAULT"/>
 	            <category android:name="android.intent.category.BROWSABLE"/>
 				<data android:scheme="fedi-pipe" android:pathPrefix="/" />
+				<data android:scheme="https" />
+				<data android:scheme="https" android:host="kodingwarrior.github.io" android:pathPrefix="/"/>
 			</intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
