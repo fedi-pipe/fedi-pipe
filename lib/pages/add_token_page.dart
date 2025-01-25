@@ -4,6 +4,9 @@ import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final SCOPES = 'read write follow push';
 
 Map<String, String> defaultHeaders = {
   'Content-Type': 'application/json',
@@ -33,6 +36,60 @@ Future<Map<String, dynamic>> verifyCredentialsForAccount(String instanceUrl, Str
   return result;
 }
 
+//const getAuthorizationURL = async ({ instanceURL, client_id }) => {
+//  const authorizationParams = new URLSearchParams({
+//    client_id,
+//    scope: SCOPES,
+//    redirect_uri: location.origin + location.pathname,
+//    // redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+//    response_type: 'code',
+//  });
+//  const authorizationURL = `https://${instanceURL}/oauth/authorize?${authorizationParams.toString()}`;
+//  return authorizationURL;
+//}
+//
+//const instanceURL = 'pixelfed.social';
+//
+//const tryLogin = async (event: Event) => {
+//  const { client_id, client_secret, vapid_key } = await authLogin(event);
+//  console.log({ client_id, client_secret, vapid_key });
+//
+//  if (client_id && client_secret) {
+//    sessionStorage.setItem('clientID', client_id);
+//    sessionStorage.setItem('clientSecret', client_secret);
+//    sessionStorage.setItem('vapidKey', vapid_key);
+//
+//    location.href = await getAuthorizationURL({
+//      instanceURL,
+//      client_id,
+//    });
+//  } else {
+//    alert('Failed to register application');
+//  }
+//}
+//
+//const authLogin = async (event: Event) => {
+//  const registrationParams = new URLSearchParams({
+//    client_name: 'QuinJet',
+//    redirect_uris: location.origin + location.pathname,
+//    scopes: SCOPES,
+//    website: "https://quinjet.vercel.app",
+//  });
+//
+//  const registrationResponse = await fetch(
+//    `https://${instanceURL}/api/v1/apps`,
+//    {
+//      method: 'POST',
+//      headers: {
+//        'Content-Type': 'application/x-www-form-urlencoded',
+//      },
+//      body: registrationParams.toString(),
+//    },
+//  );
+//  const registrationJSON = await registrationResponse.json();
+//  return registrationJSON;
+//}
+
 class AddTokenPage extends StatelessWidget {
   final TextEditingController _instanceController = TextEditingController();
   final TextEditingController _accessTokenController = TextEditingController();
@@ -58,59 +115,50 @@ class AddTokenPage extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _accessTokenController,
-                decoration: InputDecoration(
-                  hintText: 'Access Token',
-                ),
-              ),
-            ),
             ElevatedButton(
               onPressed: () async {
                 final instanceUrl = _instanceController.text;
-                final accessToken = _accessTokenController.text;
 
-                final result = await verifyCredentialsForApp(instanceUrl, accessToken);
-                final appName = result['name'];
+                final registrationParams = {
+                  'client_name': 'FediPipe',
+                  'redirect_uris': 'https://fedi-pipe.github.io/oauth',
+                  'scopes': SCOPES,
+                  'website': 'https://fedi-pipe.github.io',
+                };
 
-                if (appName != null) {
-                  final json = await verifyCredentialsForAccount(instanceUrl, accessToken);
-                  final displayName = json['display_name'];
-                  final username = json['username'];
-                  final source = json['source'] ?? {};
-                  //final description = source['note'] ?? "";
+                final registrationResponse = await http.post(
+                  Uri.parse('https://' + instanceUrl + '/api/v1/apps'),
+                  headers: defaultHeaders,
+                  body: jsonEncode(registrationParams),
+                );
 
-                  // ConfirmDialog
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text('Confirm'),
-                        content: Text("Are you sure you want to login as ${username} at ${instanceUrl}?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              final authRepository = AuthRepository();
-                              await authRepository.saveAuth(instanceUrl, accessToken);
+                print(registrationResponse);
 
-                              context.goNamed("home");
-                            },
-                            child: Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                final registrationJSON = jsonDecode(registrationResponse.body);
+
+                print(registrationResponse.headers);
+
+                print(registrationJSON);
+
+                final client_id = registrationJSON['client_id'];
+                final client_secret = registrationJSON['client_secret'];
+                final vapid_key = registrationJSON['vapid_key'];
+
+                if (client_id != null && client_secret != null) {
+                  final authorizationParams = {
+                    'client_id': client_id,
+                    'scope': SCOPES,
+                    'redirect_uri': "https://fedi-pipe.github.io/oauth",
+                    'response_type': 'code',
+                  };
+
+                  // redirecting to /oauth doesn't work
+                  final authorizationURL =
+                      'https://' + instanceUrl + '/oauth/authorize?' + Uri(queryParameters: authorizationParams).query;
+                  final url = Uri.parse(authorizationURL);
+
+                  launchUrl(url, mode: LaunchMode.externalApplication);
                 }
-                Navigator.of(context).pushReplacementNamed('/');
               },
               child: Text('Login'),
             ),

@@ -4,6 +4,7 @@ import 'package:fedi_pipe/pages/manage_accounts_page.dart';
 import 'package:fedi_pipe/pages/add_token_page.dart';
 import 'package:fedi_pipe/pages/bookmark_page.dart';
 import 'package:fedi_pipe/pages/notification_page.dart';
+import 'package:fedi_pipe/pages/oauth_page.dart';
 import 'package:fedi_pipe/pages/public_timeline_page.dart';
 import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,15 @@ final _router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) async {
     final authRepository = AuthRepository();
     final auth = await authRepository.getAuth();
+    print(auth);
+
+    print(state.path);
+    print(state.pathParameters);
+    if (state.path == '/oauth') {
+      final code = state.pathParameters['code'];
+      return '/oauth?code=$code';
+    }
+
     if (auth == null) {
       return '/add-token';
     }
@@ -36,6 +46,11 @@ final _router = GoRouter(
       builder: (context, state) => AddTokenPage(),
     ),
     GoRoute(
+      path: '/oauth',
+      name: 'oauth',
+      builder: (context, state) => OAuthPage(code: state.pathParameters['code']),
+    ),
+    GoRoute(
       path: '/manage-accounts',
       name: 'manage-accounts',
       builder: (context, state) => ManageAccountsPage(),
@@ -49,6 +64,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    print("asdasdas");
     return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
