@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -143,6 +144,11 @@ class AddTokenPage extends StatelessWidget {
                 final client_id = registrationJSON['client_id'];
                 final client_secret = registrationJSON['client_secret'];
                 final vapid_key = registrationJSON['vapid_key'];
+
+                final secureStorage = FlutterSecureStorage();
+                await secureStorage.write(key: 'INSTANCE_URL', value: instanceUrl);
+                await secureStorage.write(key: 'CLIENT_ID', value: client_id);
+                await secureStorage.write(key: 'CLIENT_SECRET', value: client_secret);
 
                 if (client_id != null && client_secret != null) {
                   final authorizationParams = {

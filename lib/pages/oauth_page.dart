@@ -1,4 +1,10 @@
+import 'dart:convert';
+
+import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 //const code = decodeURIComponent(
 //  (window.location.search.match(/code=([^&]+)/) || [, ''])[1],
@@ -94,14 +100,97 @@ import 'package:flutter/material.dart';
 //}
 //
 
-class OAuthPage extends StatelessWidget {
+class OAuthPage extends StatefulWidget {
   final String? code;
   const OAuthPage({super.key, required this.code});
 
   @override
+  State<OAuthPage> createState() => _OAuthPageState();
+}
+
+class _OAuthPageState extends State<OAuthPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    initClient();
+  }
+
+  Future<void> initClient() async {
+    final secureStorage = FlutterSecureStorage();
+    final instanceUrl = await secureStorage.read(key: 'INSTANCE_URL');
+    final clientId = await secureStorage.read(key: 'CLIENT_ID');
+    final clientSecret = await secureStorage.read(key: 'CLIENT_SECRET');
+
+    final tokenJSON = await _getAccessToken(
+      instanceUrl: instanceUrl!,
+      clientId: clientId!,
+      clientSecret: clientSecret!,
+      code: widget.code!,
+    );
+
+    print(tokenJSON);
+    final accessToken = tokenJSON['access_token'];
+    if (accessToken != null) {
+      final accountJSON = await _verifyCredentialsForApp(
+        instanceUrl: instanceUrl,
+        accessToken: accessToken,
+      );
+
+      final repository = AuthRepository();
+      await repository.saveAuth(
+        instanceUrl,
+        accessToken,
+      );
+
+      context.go('/');
+    }
+  }
+
+  Future<Map<String, dynamic>> _verifyCredentialsForApp({
+    required String instanceUrl,
+    required String accessToken,
+  }) async {
+    final url = 'https://$instanceUrl/api/v1/apps/verify_credentials';
+    final headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+    final response = await http.get(Uri.parse(url), headers: headers);
+    final result = await jsonDecode(response.body);
+    return result;
+  }
+
+  Future<Map<String, dynamic>> _getAccessToken({
+    required String instanceUrl,
+    required String clientId,
+    required String clientSecret,
+    required String code,
+  }) async {
+    final params = {
+      'client_id': clientId,
+      'client_secret': clientSecret,
+      'redirect_uri': 'fedi-pipe://fedi-pipe.github.io/oauth',
+      'grant_type': 'authorization_code',
+      'code': code,
+      'scope': 'read write follow push',
+    };
+    final tokenResponse = await http.post(
+      Uri.parse('https://$instanceUrl/oauth/token'),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params,
+    );
+    final tokenJSON = await jsonDecode(tokenResponse.body);
+    return tokenJSON;
+  }
+
+  @override
   Widget build(BuildContext context) {
     print("Hello Oauth");
-    print(code);
-    return Container();
+    print(widget.code);
+    return Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
