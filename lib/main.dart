@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:fedi_pipe/pages/favourite_page.dart';
 import 'package:fedi_pipe/pages/home_timeline_page.dart';
 import 'package:fedi_pipe/pages/manage_accounts_page.dart';
@@ -10,9 +13,14 @@ import 'package:fedi_pipe/repositories/persistent/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appLinks = AppLinks();
+
+  final initialUri = await appLinks.getInitialLink();
+  runApp(MyApp(initialUri: initialUri));
 }
 
 final _router = GoRouter(
@@ -21,6 +29,9 @@ final _router = GoRouter(
     final auth = await authRepository.getAuth();
     print(auth);
 
+    print(state.name);
+    print(state.extra);
+    print(state.fullPath);
     print(state.path);
     print(state.pathParameters);
     if (state.path == '/oauth') {
@@ -58,8 +69,51 @@ final _router = GoRouter(
   ],
 );
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final Uri? initialUri;
+  const MyApp({super.key, required this.initialUri});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AppLinks _appLinks;
+
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    initDeepLinks();
+  }
+
+  // Step 8: Method to initialize deep link handling.
+  Future<void> initDeepLinks() async {
+    _appLinks = AppLinks(); // Initialize the AppLinks instance.
+
+    if (widget.initialUri != null) {
+      _handleDeepLink(widget.initialUri!);
+    }
+
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri); // Handle the deep link when received.
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    print(uri);
+    if (uri.path == '/oauth') {
+      _router.goNamed('oauth', queryParameters: {
+        'code': uri.queryParameters['code'],
+      });
+    }
+  }
+
+  void dispose() {
+    super.dispose();
+    _linkSubscription?.cancel();
+  }
 
   // This widget is the root of your application.
   @override

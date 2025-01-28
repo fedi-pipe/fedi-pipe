@@ -121,7 +121,7 @@ class AddTokenPage extends StatelessWidget {
 
                 final registrationParams = {
                   'client_name': 'FediPipe',
-                  'redirect_uris': 'https://fedi-pipe.github.io/oauth',
+                  'redirect_uris': 'fedi-pipe://fedi-pipe.github.io/oauth',
                   'scopes': SCOPES,
                   'website': 'https://fedi-pipe.github.io',
                 };
@@ -148,7 +148,7 @@ class AddTokenPage extends StatelessWidget {
                   final authorizationParams = {
                     'client_id': client_id,
                     'scope': SCOPES,
-                    'redirect_uri': "https://fedi-pipe.github.io/oauth",
+                    'redirect_uri': "fedi-pipe://fedi-pipe.github.io/oauth",
                     'response_type': 'code',
                   };
 

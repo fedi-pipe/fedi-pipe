@@ -18,19 +18,21 @@
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
-              />
+				/>
+			<meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 
-			<intent-filter>
+			<intent-filter android:autoVerify="true">
 	            <action android:name="android.intent.action.VIEW"/>
 	            <category android:name="android.intent.category.DEFAULT"/>
 	            <category android:name="android.intent.category.BROWSABLE"/>
 				<data android:scheme="fedi-pipe" android:pathPrefix="/" />
-				<data android:scheme="http" android:host="fedi-pipe.github.io" android:pathPrefix="/"/>
-				<data android:scheme="https" />
+				<data android:scheme="http" android:host="fedi-pipe.github.io" android:pathPrefix="/oauth"/>
+				<data android:scheme="https" android:host="fedi-pipe.github.io" android:pathPrefix="/oauth"/>
 			</intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
