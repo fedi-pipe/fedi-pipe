@@ -29,14 +29,16 @@ final _router = GoRouter(
     final auth = await authRepository.getAuth();
     print(auth);
 
+    print("--- State ---");
+    print(state);
+    print("--- State ---");
     print(state.name);
     print(state.extra);
     print(state.fullPath);
     print(state.path);
     print(state.pathParameters);
-    if (state.path == '/oauth') {
-      final code = state.pathParameters['code'];
-      return '/oauth?code=$code';
+    if ((state.fullPath ?? "/").contains('/oauth')) {
+      return null;
     }
 
     if (auth == null) {
@@ -57,9 +59,15 @@ final _router = GoRouter(
       builder: (context, state) => AddTokenPage(),
     ),
     GoRoute(
-      path: '/oauth',
+      path: '/oauth/:code',
       name: 'oauth',
-      builder: (context, state) => OAuthPage(code: state.pathParameters['code']),
+      builder: (context, state) {
+        final pathParameters = state.pathParameters;
+        print("-----");
+        print(state.fullPath);
+        print("-----");
+        return OAuthPage(code: pathParameters['code']);
+      },
     ),
     GoRoute(
       path: '/manage-accounts',
@@ -102,10 +110,16 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handleDeepLink(Uri uri) {
+    print("========");
     print(uri);
+    print(uri.path);
+    print(uri.queryParameters);
+    print(uri.query);
+    print(uri.queryParametersAll);
+    print("========");
     if (uri.path == '/oauth') {
-      _router.goNamed('oauth', queryParameters: {
-        'code': uri.queryParameters['code'],
+      _router.goNamed('oauth', pathParameters: {
+        'code': uri.queryParameters['code'] ?? "",
       });
     }
   }
