@@ -1,4 +1,5 @@
 import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
+import 'package:fedi_pipe/extensions/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,7 +47,7 @@ class HtmlRenderer extends StatelessWidget {
                 final uri = Uri.parse(url!);
                 launchUrl(uri);
               },
-              child: Text(element.text,
+              child: Text(sanitizedHyperlinkContent(element.text),
                   style: TextStyle(
                       color: Colors.blue, decoration: TextDecoration.underline, decorationColor: Colors.blue)),
             ),
@@ -54,5 +55,18 @@ class HtmlRenderer extends StatelessWidget {
         }
       },
     );
+  }
+
+  String sanitizedHyperlinkContent(String content) {
+    if (content.startsWith('http://') || content.startsWith('https://')) {
+      return readableClampedUrl(content);
+    }
+
+    return content;
+  }
+
+  String readableClampedUrl(String url) {
+    final uri = Uri.parse(url);
+    return "${uri.host}${uri.path.clamp(20)}";
   }
 }
