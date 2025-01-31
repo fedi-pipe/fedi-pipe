@@ -31,9 +31,6 @@ class HtmlRenderer extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                print("------");
-                print(acct);
-                print("------");
                 showMastodonProfileBottomSheetWithLoading(context, acct);
               },
               child: Text(element.text,
