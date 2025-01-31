@@ -55,30 +55,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
         children: [
           MastodonStatusCardBody(status: status, originalStatus: widget.status),
           // 4 column grid for media attachments
-          if (status.mediaAttachments.isNotEmpty)
-            GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-              ),
-              itemCount: status.mediaAttachments.length,
-              itemBuilder: (context, index) {
-                final media = status.mediaAttachments[index];
-                return GestureDetector(
-                    onTap: () {
-                      final previewUrl = media.previewUrl!;
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Dialog(
-                            child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
-                          );
-                        },
-                      );
-                    },
-                    child: Image.network(media.previewUrl!));
-              },
-            ),
+          if (status.mediaAttachments.isNotEmpty) AttachmentRenderer(status: status),
           if (widget.status.card != null) _renderCard(),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             IconButton(
@@ -258,6 +235,288 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
   }
 }
 
+class AttachmentRenderer extends StatefulWidget {
+  const AttachmentRenderer({
+    super.key,
+    required this.status,
+  });
+
+  final MastodonStatusModel status;
+
+  @override
+  State<AttachmentRenderer> createState() => _AttachmentRendererState();
+}
+
+class _AttachmentRendererState extends State<AttachmentRenderer> {
+  Widget renderSingleAttachment(List<MediaAttachmentModel> mediaAttachments) {
+    final attachment = mediaAttachments[0];
+    return GestureDetector(
+      onTap: () {
+        final previewUrl = attachment.previewUrl!;
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
+            );
+          },
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(width: double.infinity, height: 200, fit: BoxFit.cover, attachment.previewUrl!),
+        ),
+      ),
+    );
+  }
+
+  Widget renderDoubleAttachment(List<MediaAttachmentModel> mediaAttachments) {
+    final firstAttachment = mediaAttachments[0];
+    final secondAttachment = mediaAttachments[1];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  final previewUrl = firstAttachment.previewUrl!;
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
+                      );
+                    },
+                  );
+                },
+                child:
+                    Image.network(width: double.infinity, height: 200, fit: BoxFit.cover, firstAttachment.previewUrl!),
+              ),
+            ),
+            SizedBox(width: 4),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  final previewUrl = secondAttachment.previewUrl!;
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
+                      );
+                    },
+                  );
+                },
+                child:
+                    Image.network(width: double.infinity, height: 200, fit: BoxFit.cover, secondAttachment.previewUrl!),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget renderTripleAttachment(
+    List<MediaAttachmentModel> mediaAttachments,
+  ) {
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            // LEFT SIDE (one tall image)
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  final url = mediaAttachments[0].previewUrl!;
+                  _showImageDialog(context, url);
+                },
+                child: Image.network(
+                  mediaAttachments[0].previewUrl!,
+                  fit: BoxFit.cover,
+                  height: 300, // ensures it matches the container height
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            // RIGHT SIDE (two stacked images each 146 in height)
+            Column(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      final url = mediaAttachments[1].previewUrl!;
+                      _showImageDialog(context, url);
+                    },
+                    child: SizedBox(
+                      child: Image.network(
+                        mediaAttachments[1].previewUrl!,
+                        fit: BoxFit.cover,
+                        width: MediaQuery.of(context).size.width * 0.45,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      final url = mediaAttachments[2].previewUrl!;
+                      _showImageDialog(context, url);
+                    },
+                    child: SizedBox(
+                      child: Image.network(
+                        mediaAttachments[2].previewUrl!,
+                        fit: BoxFit.cover,
+                        width: MediaQuery.of(context).size.width * 0.45,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget renderQuadMediaAttachment(List<MediaAttachmentModel> mediaAttachments) {
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageDialog(context, mediaAttachments[0].previewUrl!),
+                      child: Image.network(
+                        height: double.infinity,
+                        width: double.infinity,
+                        mediaAttachments[0].previewUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageDialog(context, mediaAttachments[1].previewUrl!),
+                      child: Image.network(
+                        height: double.infinity,
+                        width: double.infinity,
+                        mediaAttachments[1].previewUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageDialog(context, mediaAttachments[2].previewUrl!),
+                      child: Image.network(
+                        height: double.infinity,
+                        width: double.infinity,
+                        mediaAttachments[2].previewUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageDialog(context, mediaAttachments[3].previewUrl!),
+                      child: Image.network(
+                        height: double.infinity,
+                        width: double.infinity,
+                        mediaAttachments[3].previewUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showImageDialog(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        child: InteractiveViewer(
+          clipBehavior: Clip.none,
+          child: Image.network(url),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.status.mediaAttachments.length == 1) {
+      return renderSingleAttachment(widget.status.mediaAttachments);
+    }
+    if (widget.status.mediaAttachments.length == 2) {
+      return renderDoubleAttachment(widget.status.mediaAttachments);
+    }
+
+    if (widget.status.mediaAttachments.length == 3) {
+      return renderTripleAttachment(widget.status.mediaAttachments);
+    }
+
+    if (widget.status.mediaAttachments.length == 4) {
+      return renderQuadMediaAttachment(widget.status.mediaAttachments);
+    }
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+      itemCount: widget.status.mediaAttachments.length,
+      itemBuilder: (context, index) {
+        final media = widget.status.mediaAttachments[index];
+        return GestureDetector(
+            onTap: () {
+              final previewUrl = media.previewUrl!;
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    child: InteractiveViewer(clipBehavior: Clip.none, child: Image.network(previewUrl)),
+                  );
+                },
+              );
+            },
+            child: Image.network(media.previewUrl!));
+      },
+    );
+  }
+}
+
 class MastodonStatusCardBody extends StatelessWidget {
   const MastodonStatusCardBody({
     super.key,
@@ -400,10 +659,10 @@ class _MastodonAccountPreviewState extends State<MastodonAccountPreview> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text("@${widget.account.acct!}"),
           Text(widget.account.username),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           HtmlRenderer(html: widget.account.note!),
           SizedBox(height: 16),
           GridView.builder(
