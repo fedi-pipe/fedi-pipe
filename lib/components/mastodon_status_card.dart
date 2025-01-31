@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:popover/popover.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class MastodonStatusCard extends StatefulWidget {
   const MastodonStatusCard({super.key, required this.status});
@@ -316,7 +317,7 @@ class MastodonStatusCardBody extends StatelessWidget {
             onTap: () {
               MastodonStatusRepository.fetchStatus(originalStatus.id);
             },
-            child: Text(status.createdAt)),
+            child: Text(timeago.format(DateTime.parse(status.createdAt)))),
       ),
       Padding(
         padding: const EdgeInsets.all(8.0),
