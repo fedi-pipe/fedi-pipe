@@ -4,7 +4,7 @@ import 'package:fedi_pipe/pages/profile_page.dart';
 import 'package:fedi_pipe/repositories/mastodon/account_repository.dart';
 import 'package:flutter/material.dart';
 
-void showMastodonProfileBottomSheet(BuildContext context, String acct) {
+void showMastodonProfileBottomSheetWithLoading(BuildContext context, String acct) {
   MastodonAccountRepository.lookUpAccount(acct).then((account) {
     showModalBottomSheet(
       context: context,
@@ -13,6 +13,15 @@ void showMastodonProfileBottomSheet(BuildContext context, String acct) {
       },
     );
   });
+}
+
+void showMastodonProfileBottomSheet(BuildContext context, MastodonAccountModel account) {
+  showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return MastodonProfileBottomSheet(account: account);
+    },
+  );
 }
 
 class MastodonProfileBottomSheet extends StatelessWidget {

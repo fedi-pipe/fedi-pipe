@@ -339,7 +339,7 @@ class MastodonAccountAvatar extends StatelessWidget {
     final account = status.account;
     return GestureDetector(
       onTap: () {
-        showMastodonProfileBottomSheet(context, account.acct!);
+        showMastodonProfileBottomSheet(context, account);
       },
       onLongPress: () {
         showPopover(
