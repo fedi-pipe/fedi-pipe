@@ -6,17 +6,20 @@ import 'package:flutter/material.dart';
 
 import 'package:fedi_pipe/components/skeletons/profile_skeleton.dart';
 
+// Function to show the bottom sheet when account data needs to be loaded via acctIdentifier
 void showMastodonProfileBottomSheetWithLoading(BuildContext context, String acct) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+    isScrollControlled: true, // Allows the sheet to take up more screen height if needed
+    backgroundColor: Colors.transparent, // Makes the default sheet background transparent
     builder: (context) {
+      // MastodonProfileBottomSheet will handle its own loading state
       return MastodonProfileBottomSheet(acctIdentifier: acct);
     },
   );
 }
 
+// Function to show the bottom sheet when MastodonAccountModel is already available
 void showMastodonProfileBottomSheet(BuildContext context, MastodonAccountModel account) {
   showModalBottomSheet(
     context: context,
@@ -37,7 +40,7 @@ class MastodonProfileBottomSheet extends StatefulWidget {
     this.initialAccount,
     this.acctIdentifier,
   }) : assert(initialAccount != null || acctIdentifier != null,
-              'Either initialAccount or acctIdentifier must be provided');
+            'Either initialAccount or acctIdentifier must be provided');
 
   @override
   State<MastodonProfileBottomSheet> createState() => _MastodonProfileBottomSheetState();
@@ -57,6 +60,8 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
     } else if (widget.acctIdentifier != null) {
       _fetchAccountDetails();
     } else {
+      // This case should ideally not be reached due to the assertion
+      // in the widget's constructor.
       _isLoading = false;
       _error = "No account information provided.";
     }
@@ -64,13 +69,17 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
 
   Future<void> _fetchAccountDetails() async {
     if (widget.acctIdentifier == null) return;
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    // Ensure loading state is set if fetching
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
     try {
       final accountData = await MastodonAccountRepository.lookUpAccount(widget.acctIdentifier!);
       if (mounted) {
+        // Check if the widget is still in the tree
         setState(() {
           _account = accountData;
           _isLoading = false;
@@ -78,6 +87,7 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
       }
     } catch (e) {
       if (mounted) {
+        // Check again
         setState(() {
           _error = "Failed to load profile: ${e.toString()}";
           _isLoading = false;
@@ -102,24 +112,36 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
         child: Center(child: Text('Profile data not available.')),
       );
     } else {
+      // If account data is available, render the actual profile content
       final currentAccount = _account!;
       content = SingleChildScrollView(
+        // Make content scrollable if it overflows
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Profile Header (Avatar, Name, Acct)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfilePage(initialAccount: currentAccount)));
+                    Navigator.of(context).pop(); // Close the bottom sheet
+                    // Navigate to the full profile page
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => ProfilePage(initialAccount: currentAccount)));
                   },
                   child: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(currentAccount.avatar ?? ''),
-                    onBackgroundImageError: (_, __) {},
+                    radius: 30, // Avatar size
+                    backgroundImage: currentAccount.avatar != null && currentAccount.avatar!.isNotEmpty
+                        ? NetworkImage(currentAccount.avatar!)
+                        : null,
+                    onBackgroundImageError: currentAccount.avatar != null && currentAccount.avatar!.isNotEmpty
+                        ? (_, __) {} // Placeholder for error, or a default icon
+                        : null,
+                    child: (currentAccount.avatar == null || currentAccount.avatar!.isEmpty)
+                        ? Icon(Icons.person, size: 30) // Default icon if no avatar
+                        : null,
                   ),
                 ),
                 SizedBox(width: 12),
@@ -131,32 +153,51 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
                       Text(
                         currentAccount.displayName ?? currentAccount.username,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 2, overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (currentAccount.acct != null)
-                        Text("@${currentAccount.acct}", style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey[600]),
-                           maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          "@${currentAccount.acct}",
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey[600]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
                 ),
+                // Optional: Add a follow/more_options button here if needed
               ],
             ),
             SizedBox(height: 16),
+
+            // Profile Note/Bio
             if (currentAccount.note != null && currentAccount.note!.isNotEmpty)
               HtmlRenderer(
                 html: currentAccount.note!,
                 onMentionTapped: (acctIdentifier) {
+                  // If the tapped mention is the current profile, just close the sheet.
                   if (acctIdentifier == currentAccount.acct || "@${acctIdentifier}" == currentAccount.acct) {
-                     Navigator.of(context).pop();
-                     return;
+                    Navigator.of(context).pop();
+                    return;
                   }
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close current bottom sheet
+                  // Navigate to ProfilePage, which will handle its own loading skeleton
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => ProfilePage(acctIdentifier: acctIdentifier),
                   ));
                 },
+              )
+            else
+              Padding(
+                // Added padding for "No bio" text for better spacing
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child:
+                    Text("No bio available.", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[600])),
               ),
             SizedBox(height: 16),
+
+            // Profile Stats
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -165,25 +206,33 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
                 _buildStatItem(context, "Posts", currentAccount.statusesCount),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 16), // Padding at the bottom
           ],
         ),
       );
     }
 
+    // Outer container for the bottom sheet's shape and padding
     return ClipRRect(
-      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20), // Rounded corners for the sheet
+        topRight: Radius.circular(20),
+      ),
       child: Container(
-        color: Theme.of(context).cardColor,
-        padding: EdgeInsets.only(top: 20, left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
+        color: Theme.of(context).cardColor, // Use themed card color for background
+        padding: EdgeInsets.only(
+            top: 20, left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16 // Adjust for keyboard
+            ),
         constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          // Set max height for the sheet
+          maxHeight: MediaQuery.of(context).size.height * 0.75, // Example: 75% of screen height
         ),
-        child: content,
+        child: content, // The actual content (skeleton or profile data)
       ),
     );
   }
 
+  // Helper widget to build individual stat items (Followers, Following, Posts)
   Widget _buildStatItem(BuildContext context, String label, int count) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -192,6 +241,7 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
           count.toString(),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
+        SizedBox(height: 2), // Reduced space
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
@@ -201,83 +251,3 @@ class _MastodonProfileBottomSheetState extends State<MastodonProfileBottomSheet>
   }
 }
 
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      ),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfilePage(account: account)));
-                },
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundImage: NetworkImage(account.avatar!),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.displayName!,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, overflow: TextOverflow.ellipsis),
-                    ),
-                    Text(
-                      account.acct!,
-                      style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          if (account.note != null && account.note!.isNotEmpty)
-            HtmlRenderer(
-              html: account.note!,
-              onMentionTapped: (String acctIdentifier) {
-                if (acctIdentifier == account.acct || "@${acctIdentifier}" == account.acct) {
-                  Navigator.of(context).pop();
-                  return;
-                }
-
-                Navigator.of(context).pop();
-
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext dialogContext) {
-                    return Center(child: CircularProgressIndicator());
-                  },
-                );
-
-                MastodonAccountRepository.lookUpAccount(acctIdentifier).then((mentionedAccount) {
-                  Navigator.of(context).pop();
-
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext navContext) => ProfilePage(account: mentionedAccount),
-                  ));
-                }).catchError((error) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Could not load profile for @$acctIdentifier. Error: $error")),
-                  );
-                });
-              },
-            ),
-          SizedBox(height: 16),
-        ]),
-      ),
-    );
-  }
-}
