@@ -6,7 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class HtmlRenderer extends StatelessWidget {
   final String html;
-  const HtmlRenderer({super.key, required this.html});
+  final void Function(String acctIdentifier)? onMentionTapped;
+
+  const HtmlRenderer({super.key, required this.html, this.onMentionTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,9 @@ class HtmlRenderer extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                showMastodonProfileBottomSheetWithLoading(context, acct);
+                if (onMentionTapped != null) {
+                  onMentionTapped!(acct);
+                }
               },
               child: Text(element.text,
                   style: TextStyle(

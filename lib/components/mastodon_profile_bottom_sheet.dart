@@ -69,7 +69,12 @@ class MastodonProfileBottomSheet extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16),
-          HtmlRenderer(html: account.note!),
+          HtmlRenderer(
+            html: account.note!,
+            onMentionTapped: (acct) {
+              showMastodonProfileBottomSheetWithLoading(context, acct);
+            },
+          ),
           SizedBox(height: 16),
         ]),
       ),

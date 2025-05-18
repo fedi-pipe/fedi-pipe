@@ -580,7 +580,12 @@ class MastodonStatusCardBody extends StatelessWidget {
       ),
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: HtmlRenderer(html: status.content),
+        child: HtmlRenderer(
+          html: status.content,
+          onMentionTapped: (acct) {
+            showMastodonProfileBottomSheetWithLoading(context, acct);
+          },
+        ),
       )
     ]);
   }
