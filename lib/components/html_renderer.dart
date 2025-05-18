@@ -1,4 +1,3 @@
-import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
 import 'package:fedi_pipe/extensions/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
@@ -6,7 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class HtmlRenderer extends StatelessWidget {
   final String html;
-  const HtmlRenderer({super.key, required this.html});
+  final void Function(String acctIdentifier)? onMentionTapped;
+
+  const HtmlRenderer({super.key, required this.html, this.onMentionTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,12 @@ class HtmlRenderer extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                showMastodonProfileBottomSheetWithLoading(context, acct);
+                if (onMentionTapped != null) {
+                  onMentionTapped!(acct);
+                } else {
+                  print(
+                      "Warning: HtmlRenderer.onMentionTapped is null. Mention for '$acct' was tapped but no action is defined by parent.");
+                }
               },
               child: Text(element.text,
                   style: TextStyle(
