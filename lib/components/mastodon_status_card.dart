@@ -582,8 +582,8 @@ class MastodonStatusCardBody extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: HtmlRenderer(
           html: status.content,
-          onMentionTapped: (acct) {
-            showMastodonProfileBottomSheetWithLoading(context, acct);
+          onMentionTapped: (acctIdentifier) {
+            showMastodonProfileBottomSheetWithLoading(context, acctIdentifier);
           },
         ),
       )
