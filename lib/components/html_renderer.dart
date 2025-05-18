@@ -1,4 +1,3 @@
-import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
 import 'package:fedi_pipe/extensions/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
@@ -36,6 +35,9 @@ class HtmlRenderer extends StatelessWidget {
               onTap: () {
                 if (onMentionTapped != null) {
                   onMentionTapped!(acct);
+                } else {
+                  print(
+                      "Warning: HtmlRenderer.onMentionTapped is null. Mention for '$acct' was tapped but no action is defined by parent.");
                 }
               },
               child: Text(element.text,
