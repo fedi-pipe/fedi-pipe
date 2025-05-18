@@ -48,6 +48,7 @@ dependencies:
   app_links: ^6.3.3
   flutter_secure_storage: ^9.2.4
   timeago: ^3.7.0
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
