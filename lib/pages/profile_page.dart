@@ -34,6 +34,13 @@ class ProfilePage extends StatefulWidget {
   Widget _buildBody() {
     if (_isLoading) {
       return MastodonProfileSkeleton(isBottomSheet: false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = "Failed to load profile: ${e.toString()}";
+          _isLoading = false;
+        });
+      }
     }
     if (_error != null) {
       return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: Text(_error!, textAlign: TextAlign.center)));
