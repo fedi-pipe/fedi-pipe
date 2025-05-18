@@ -1,5 +1,6 @@
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/repositories/mastodon/account_repository.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -89,7 +90,32 @@ class ProfilePage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 16),
-                  HtmlRenderer(html: account.note!)
+                  HtmlRenderer(
+                    html: account.note!,
+                    onMentionTapped: (String acctIdentifier) {
+                      if (acctIdentifier == account.acct || "@${acctIdentifier}" == account.acct) {
+                        return;
+                      }
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => Center(child: CircularProgressIndicator()),
+                      );
+
+                      MastodonAccountRepository.lookUpAccount(acctIdentifier).then((mentionedAccount) {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ProfilePage(account: mentionedAccount),
+                        ));
+                      }).catchError((error) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Could not load profile for @$acctIdentifier.")),
+                        );
+                      });
+                    },
+                  )
                 ],
               ),
             ),
