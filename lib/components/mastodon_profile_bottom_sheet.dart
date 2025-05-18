@@ -69,12 +69,39 @@ class MastodonProfileBottomSheet extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16),
-          HtmlRenderer(
-            html: account.note!,
-            onMentionTapped: (acct) {
-              showMastodonProfileBottomSheetWithLoading(context, acct);
-            },
-          ),
+          if (account.note != null && account.note!.isNotEmpty)
+            HtmlRenderer(
+              html: account.note!,
+              onMentionTapped: (String acctIdentifier) {
+                if (acctIdentifier == account.acct || "@${acctIdentifier}" == account.acct) {
+                  Navigator.of(context).pop();
+                  return;
+                }
+
+                Navigator.of(context).pop();
+
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext dialogContext) {
+                    return Center(child: CircularProgressIndicator());
+                  },
+                );
+
+                MastodonAccountRepository.lookUpAccount(acctIdentifier).then((mentionedAccount) {
+                  Navigator.of(context).pop();
+
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext navContext) => ProfilePage(account: mentionedAccount),
+                  ));
+                }).catchError((error) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Could not load profile for @$acctIdentifier. Error: $error")),
+                  );
+                });
+              },
+            ),
           SizedBox(height: 16),
         ]),
       ),
