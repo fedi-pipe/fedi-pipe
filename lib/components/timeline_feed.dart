@@ -25,15 +25,11 @@ class _TimelineFeedState extends State<TimelineFeed> {
   // Indicates whether a fetch is in progress.
   bool _isLoading = false;
 
-  // For link-based pagination; typically extracted from Mastodon Link headers,
-  // but here we store them manually for demonstration.
-  String? _nextId;
-  String? _prevId;
 
   @override
   void initState() {
     super.initState();
-    _fetchStatuses(direction: ScrollDirection.up); // Initial load
+    _fetchStatuses(direction: ScrollDirection.refresh); // Initial load is a refresh
     _scrollController.addListener(_onScroll);
   }
 
@@ -49,42 +45,81 @@ class _TimelineFeedState extends State<TimelineFeed> {
     final maxScroll = position.maxScrollExtent;
 
     // If scrolled near the bottom, fetch older statuses.
-    if (pixels >= maxScroll - 200) {
+    if (pixels >= maxScroll - 200 && !_isLoading) { // check !_isLoading
       _fetchStatuses(direction: ScrollDirection.down);
     }
 
-    // If scrolled near the top, fetch newer statuses.
-    if (pixels <= 200) {
-      _fetchStatuses(direction: ScrollDirection.up);
-    }
+    // Upward scroll to fetch newer items is less common with pull-to-refresh,
+    // but can be kept if desired.
+    // if (pixels <= 200 && !_isLoading) { // check !_isLoading
+    //   _fetchStatuses(direction: ScrollDirection.up);
+    // }
   }
 
-  void _fetchStatuses({required ScrollDirection direction}) async {
+  Future<void> _fetchStatuses({required ScrollDirection direction}) async { // Return Future<void>
     if (_isLoading) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) { // Check mounted before initial setState
+        setState(() {
+        _isLoading = true;
+        });
+    }
 
-    final nextId = direction == ScrollDirection.up ? _statuses.firstOrNull?.id : null;
-    final previousId = direction == ScrollDirection.down ? _statuses.lastOrNull?.id : null;
 
-    final statuses = await MastodonStatusRepository.fetchStatuses(
-      previousId: previousId,
-      nextId: nextId,
-      feedType: widget.feedType,
-    );
+    String? fetchNextId;    // Renamed from nextId to avoid conflict
+    String? fetchPreviousId; // Renamed from previousId
 
-    setState(() {
-      if (direction == ScrollDirection.up) {
-        _statuses = [...statuses, ..._statuses];
-      } else {
-        _statuses = [..._statuses, ...statuses];
+    if (direction == ScrollDirection.refresh) {
+      // For refresh, we want the newest items.
+      // Simplest approach: clear and fetch fresh.
+      // Or, if fetching newer than the current newest:
+      // fetchNextId = _statuses.isNotEmpty ? _statuses.first.id : null;
+      _statuses.clear(); // Clear list for a full refresh
+    } else if (direction == ScrollDirection.up && _statuses.isNotEmpty) {
+      fetchNextId = _statuses.first.id;
+    } else if (direction == ScrollDirection.down && _statuses.isNotEmpty) {
+      fetchPreviousId = _statuses.last.id;
+    }
+
+    try {
+      final newStatuses = await MastodonStatusRepository.fetchStatuses(
+        previousId: fetchPreviousId,
+        nextId: fetchNextId,
+        feedType: widget.feedType,
+      );
+
+      if (mounted) { // Check if the widget is still in the tree
+        setState(() {
+          if (direction == ScrollDirection.refresh || direction == ScrollDirection.up) {
+            // For refresh or fetching newer, prepend new statuses.
+            // Ensure no duplicates if API might return overlapping items.
+            // A more robust way might be to use a Set of IDs for existing statuses.
+            final existingIds = _statuses.map((s) => s.id).toSet();
+            _statuses = [...newStatuses.where((ns) => !existingIds.contains(ns.id)), ..._statuses];
+          } else { // ScrollDirection.down
+            // Append older statuses.
+            final existingIds = _statuses.map((s) => s.id).toSet();
+            _statuses = [..._statuses, ...newStatuses.where((ns) => !existingIds.contains(ns.id))];
+          }
+        });
       }
-      _isLoading = false;
-    });
+    } catch (e) {
+      // Handle error, e.g., show a snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching statuses: ${e.toString()}'))
+        );
+        print('Error fetching statuses: $e'); // Also log to console
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
