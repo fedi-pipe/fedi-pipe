@@ -43,41 +43,40 @@ class _TimelineFeedState extends State<TimelineFeed> {
     final pixels = position.pixels;
     final maxScroll = position.maxScrollExtent;
 
-    // If scrolled near the bottom, fetch older statuses.
-    if (pixels >= maxScroll - 200 && !_isLoading) {
-      // check !_isLoading
+    if (pixels >= maxScroll - 200 && !_isLoading) { // check !_isLoading for pagination
       _fetchStatuses(direction: ScrollDirection.down);
     }
 
-    // Upward scroll to fetch newer items is less common with pull-to-refresh,
-    // but can be kept if desired.
-    // if (pixels <= 200 && !_isLoading) { // check !_isLoading
+    // Upward scroll for fetching newer items via scroll is generally replaced by pull-to-refresh.
+    // if (pixels <= 200 && !_isLoading) {
     //   _fetchStatuses(direction: ScrollDirection.up);
     // }
   }
 
   Future<void> _fetchStatuses({required ScrollDirection direction}) async {
-    // Return Future<void>
-    if (_isLoading) {
+    // Allow refresh action even if another load (e.g. pagination) was ongoing.
+    // For pagination (up/down), prevent concurrent calls if already loading.
+    if (_isLoading && direction != ScrollDirection.refresh) {
       return;
     }
 
+    // If a refresh is triggered, it takes precedence.
+    // No need to explicitly cancel other futures here unless complex state management is needed.
+    // The RefreshIndicator expects this onRefresh Future to complete.
+
     if (mounted) {
-      // Check mounted before initial setState
       setState(() {
         _isLoading = true;
       });
     }
 
-    String? fetchNextId; // Renamed from nextId to avoid conflict
-    String? fetchPreviousId; // Renamed from previousId
+    String? fetchNextId;
+    String? fetchPreviousId;
 
     if (direction == ScrollDirection.refresh) {
-      // For refresh, we want the newest items.
-      // Simplest approach: clear and fetch fresh.
-      // Or, if fetching newer than the current newest:
-      // fetchNextId = _statuses.isNotEmpty ? _statuses.first.id : null;
-      _statuses.clear(); // Clear list for a full refresh
+      // For refresh, always clear existing statuses to fetch the newest.
+      _statuses.clear();
+      // nextId and previousId remain null to fetch the latest timeline.
     } else if (direction == ScrollDirection.up && _statuses.isNotEmpty) {
       fetchNextId = _statuses.first.id;
     } else if (direction == ScrollDirection.down && _statuses.isNotEmpty) {
@@ -85,6 +84,11 @@ class _TimelineFeedState extends State<TimelineFeed> {
     }
 
     try {
+      // Simulate network delay for refresh indicator visibility if API is too fast
+      // if (direction == ScrollDirection.refresh) {
+      //   await Future.delayed(Duration(milliseconds: 700));
+      // }
+
       final newStatuses = await MastodonStatusRepository.fetchStatuses(
         previousId: fetchPreviousId,
         nextId: fetchNextId,
@@ -92,27 +96,23 @@ class _TimelineFeedState extends State<TimelineFeed> {
       );
 
       if (mounted) {
-        // Check if the widget is still in the tree
         setState(() {
+          final existingIds = _statuses.map((s) => s.id).toSet();
+          List<MastodonStatusModel> uniqueNewStatuses = newStatuses.where((ns) => !existingIds.contains(ns.id)).toList();
+
           if (direction == ScrollDirection.refresh || direction == ScrollDirection.up) {
-            // For refresh or fetching newer, prepend new statuses.
-            // Ensure no duplicates if API might return overlapping items.
-            // A more robust way might be to use a Set of IDs for existing statuses.
-            final existingIds = _statuses.map((s) => s.id).toSet();
-            _statuses = [...newStatuses.where((ns) => !existingIds.contains(ns.id)), ..._statuses];
-          } else {
-            // ScrollDirection.down
-            // Append older statuses.
-            final existingIds = _statuses.map((s) => s.id).toSet();
-            _statuses = [..._statuses, ...newStatuses.where((ns) => !existingIds.contains(ns.id))];
+            _statuses.insertAll(0, uniqueNewStatuses);
+          } else { // ScrollDirection.down
+            _statuses.addAll(uniqueNewStatuses);
           }
         });
       }
     } catch (e) {
-      // Handle error, e.g., show a snackbar
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error fetching statuses: ${e.toString()}')));
-        print('Error fetching statuses: $e'); // Also log to console
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching statuses: ${e.toString()}'))
+        );
+        print('Error fetching statuses: $e');
       }
     } finally {
       if (mounted) {
