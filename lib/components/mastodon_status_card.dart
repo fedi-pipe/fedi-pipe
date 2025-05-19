@@ -753,16 +753,19 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
   void _scrollToShowFocusedInput() {
     if (!mounted || !_focusNode.hasPrimaryFocus) return;
 
-    final focusedContext = _focusNode.context;
+    final BuildContext? focusedContext = _focusNode.context;
     if (focusedContext != null) {
-      final scrollableState = Scrollable.maybeOf(focusedContext);
-      if (scrollableState != null && scrollableState.position.hasPixels) {
-        scrollableState.position.ensureVisible(
-          _focusNode.renderObject!,
-          alignment: 0.1,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.ease,
-        );
+      final RenderObject? renderObject = focusedContext.findRenderObject();
+      if (renderObject != null) {
+        final ScrollableState? scrollableState = Scrollable.maybeOf(focusedContext);
+        if (scrollableState != null && scrollableState.position.hasPixels) {
+          scrollableState.position.ensureVisible(
+            renderObject,
+            alignment: 0.1,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          );
+        }
       }
     }
   }
