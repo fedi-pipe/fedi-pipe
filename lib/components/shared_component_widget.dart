@@ -132,11 +132,10 @@ class _SharedComposeWidgetState extends State<SharedComposeWidget> {
           maxLines: widget.maxLines,
           textCapitalization: TextCapitalization.sentences, // Good for general text input
           decoration: InputDecoration(
-            hintText: widget.hintText,
-            border: const OutlineInputBorder(),
-            filled: true, // Add a subtle background color
-            fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.05),
-          ),
+              hintText: widget.hintText,
+              border: const OutlineInputBorder(),
+              filled: true, // Add a subtle background color
+              fillColor: Colors.white),
         );
       },
     );

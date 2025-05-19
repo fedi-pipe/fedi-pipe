@@ -802,71 +802,79 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
         bottom: keyboardHeight + verticalDialogScreenMargin,
       ),
       child: Material(
-        elevation: 8.0,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         clipBehavior: Clip.antiAlias, // Ensures content respects border radius
         child: SingleChildScrollView(
           // This SingleChildScrollView makes the *content inside the Material dialog* scrollable.
           // Its viewport height is determined by the space left for the Material widget
           // by the outer Padding.
+
           controller: _scrollController,
-          padding: const EdgeInsets.all(16.0), // Internal padding for the dialog's content
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // Dialog content takes minimum necessary height
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Display the status being replied to
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(4.0), // Internal padding for the dialog's content
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Dialog content takes minimum necessary height
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Display the status being replied to
+              Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerLowest, // A subtle background
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: MastodonStatusCardBody(
-                    status: _effectiveStatus,
-                    originalStatus: widget.status, // Pass the original for reblog info
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-
-                // Compose area using SharedComposeWidget
-                SharedComposeWidget(
-                  taggerController: _replyTaggerController,
-                  focusNode: _focusNode,
-                  hintText: "Your reply...",
-                  minLines: 4, // A good default for reply boxes
-                  maxLines: 8, // Allows for longer replies with internal scrolling
-                ),
-                const SizedBox(height: 16.0),
-
-                // Action button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.reply),
-                      label: const Text("Reply"),
-                      onPressed: () {
-                        final replyText = _replyTaggerController.text.trim();
-                        // Ensure reply is not empty and actually different from just prefilled mentions
-                        if (replyText.isNotEmpty && replyText != _effectiveStatus.replyMentions().join(' ').trim()) {
-                          MastodonStatusRepository.replyToStatus(_effectiveStatus.id, replyText);
-                          Navigator.of(context).pop(); // Close dialog on successful reply
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Replied!')),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Reply cannot be empty.')),
-                          );
-                        }
-                      },
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerLowest, // A subtle background
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: MastodonStatusCardBody(
+                        status: _effectiveStatus,
+                        originalStatus: widget.status, // Pass the original for reblog info
+                      ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    const SizedBox(height: 12.0),
+
+                    // Compose area using SharedComposeWidget
+                    SharedComposeWidget(
+                      taggerController: _replyTaggerController,
+                      focusNode: _focusNode,
+                      hintText: "Your reply...",
+                      minLines: 4, // A good default for reply boxes
+                      maxLines: 8, // Allows for longer replies with internal scrolling
+                    ),
+                    const SizedBox(height: 16.0),
+                  ])),
+
+              // Action button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.reply),
+                    label: const Text("Reply"),
+                    onPressed: () {
+                      final replyText = _replyTaggerController.text.trim();
+                      // Ensure reply is not empty and actually different from just prefilled mentions
+                      if (replyText.isNotEmpty && replyText != _effectiveStatus.replyMentions().join(' ').trim()) {
+                        MastodonStatusRepository.replyToStatus(_effectiveStatus.id, replyText);
+                        Navigator.of(context).pop(); // Close dialog on successful reply
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Replied!')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Reply cannot be empty.')),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
