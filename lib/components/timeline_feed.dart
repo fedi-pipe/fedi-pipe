@@ -3,7 +3,7 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:flutter/material.dart';
 
-enum ScrollDirection { up, down }
+enum ScrollDirection { up, down, refresh }
 
 class TimelineFeed extends StatefulWidget {
   FeedType feedType;
@@ -25,7 +25,6 @@ class _TimelineFeedState extends State<TimelineFeed> {
   // Indicates whether a fetch is in progress.
   bool _isLoading = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -45,7 +44,8 @@ class _TimelineFeedState extends State<TimelineFeed> {
     final maxScroll = position.maxScrollExtent;
 
     // If scrolled near the bottom, fetch older statuses.
-    if (pixels >= maxScroll - 200 && !_isLoading) { // check !_isLoading
+    if (pixels >= maxScroll - 200 && !_isLoading) {
+      // check !_isLoading
       _fetchStatuses(direction: ScrollDirection.down);
     }
 
@@ -56,19 +56,20 @@ class _TimelineFeedState extends State<TimelineFeed> {
     // }
   }
 
-  Future<void> _fetchStatuses({required ScrollDirection direction}) async { // Return Future<void>
+  Future<void> _fetchStatuses({required ScrollDirection direction}) async {
+    // Return Future<void>
     if (_isLoading) {
       return;
     }
 
-    if (mounted) { // Check mounted before initial setState
-        setState(() {
+    if (mounted) {
+      // Check mounted before initial setState
+      setState(() {
         _isLoading = true;
-        });
+      });
     }
 
-
-    String? fetchNextId;    // Renamed from nextId to avoid conflict
+    String? fetchNextId; // Renamed from nextId to avoid conflict
     String? fetchPreviousId; // Renamed from previousId
 
     if (direction == ScrollDirection.refresh) {
@@ -90,7 +91,8 @@ class _TimelineFeedState extends State<TimelineFeed> {
         feedType: widget.feedType,
       );
 
-      if (mounted) { // Check if the widget is still in the tree
+      if (mounted) {
+        // Check if the widget is still in the tree
         setState(() {
           if (direction == ScrollDirection.refresh || direction == ScrollDirection.up) {
             // For refresh or fetching newer, prepend new statuses.
@@ -98,7 +100,8 @@ class _TimelineFeedState extends State<TimelineFeed> {
             // A more robust way might be to use a Set of IDs for existing statuses.
             final existingIds = _statuses.map((s) => s.id).toSet();
             _statuses = [...newStatuses.where((ns) => !existingIds.contains(ns.id)), ..._statuses];
-          } else { // ScrollDirection.down
+          } else {
+            // ScrollDirection.down
             // Append older statuses.
             final existingIds = _statuses.map((s) => s.id).toSet();
             _statuses = [..._statuses, ...newStatuses.where((ns) => !existingIds.contains(ns.id))];
@@ -108,9 +111,7 @@ class _TimelineFeedState extends State<TimelineFeed> {
     } catch (e) {
       // Handle error, e.g., show a snackbar
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching statuses: ${e.toString()}'))
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error fetching statuses: ${e.toString()}')));
         print('Error fetching statuses: $e'); // Also log to console
       }
     } finally {
