@@ -806,12 +806,11 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         clipBehavior: Clip.antiAlias, // Ensures content respects border radius
         child: SingleChildScrollView(
-          // This scrolls the *content* of the dialog if it overflows
+          // This SingleChildScrollView makes the *content inside the Material dialog* scrollable.
+          // Its viewport height is determined by the space left for the Material widget
+          // by the outer Padding.
           controller: _scrollController,
-          padding: const EdgeInsets.all(16.0), // Internal padding for all dialog content
-          child: GestureDetector(
-            // Consumes taps within the dialog to prevent dismissal
-            onTap: () {},
+          padding: const EdgeInsets.all(16.0), // Internal padding for the dialog's content
             child: Column(
               mainAxisSize: MainAxisSize.min, // Dialog content takes minimum necessary height
               crossAxisAlignment: CrossAxisAlignment.stretch,
