@@ -1,3 +1,4 @@
+import 'dart:math'; // For using the min() function
 import 'package:fedi_pipe/models/mastodon_status.dart'; // Ensure this path is correct
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,7 @@ class SearchResultView extends StatelessWidget {
 
   // Configuration for the view's size
   static const double _estimatedItemHeight = 58.0; // Approximate height of a ListTile with some padding
-  static const int _maxVisibleItemsBeforeScroll = 3; // Max items to show before the list scrolls
+  static const int _maxVisibleItemsBeforeScroll = 4; // Max items to show before the list scrolls
 
   const SearchResultView({
     Key? key,
@@ -32,7 +33,8 @@ class SearchResultView extends StatelessWidget {
         // The actual maxHeight for our view should be the minimum of:
         // 1. The height preferred by our content (e.g., up to _maxVisibleItemsBeforeScroll items).
         // 2. The max height actually allowed by the parent/overlay slot.
-        final double contentPreferredMaxHeight = _maxVisibleItemsBeforeScroll * _estimatedItemHeight;
+        final int effectiveMaxItems = min(_maxVisibleItemsBeforeScroll, 4);
+        final double contentPreferredMaxHeight = effectiveMaxItems * _estimatedItemHeight;
         final double actualMaxHeight =
             (contentPreferredMaxHeight < parentProvidedMaxHeight) ? contentPreferredMaxHeight : parentProvidedMaxHeight;
 
