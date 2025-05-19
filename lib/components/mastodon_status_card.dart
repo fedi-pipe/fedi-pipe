@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
+import 'package:fedi_pipe/components/shared_component_widget.dart';
 import 'package:fedi_pipe/extensions/string.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/utils/parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
+import 'package:fluttertagger/fluttertagger.dart';
 import 'package:popover/popover.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -702,77 +704,179 @@ class ReplyDialogBody extends StatefulWidget {
 }
 
 class _ReplyDialogBodyState extends State<ReplyDialogBody> {
-  late final TextEditingController _controller;
+  late final FlutterTaggerController _replyTaggerController;
+  final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-
-  late final MastodonStatusModel status;
-  late Future<DOMNode> domNode;
+  late final MastodonStatusModel _effectiveStatus;
 
   @override
   void initState() {
     super.initState();
-    status = widget.status.reblog ?? widget.status;
-    domNode = HTMLParser(status.content).parse();
+    _effectiveStatus = widget.status.reblog ?? widget.status;
+    final initialReplyText = "${_effectiveStatus.replyMentions().join(' ')} ";
+    _replyTaggerController = FlutterTaggerController(text: initialReplyText);
 
-    final text = "${status.replyMentions().join(' ')} ";
-    _controller = TextEditingController(text: text);
+    _focusNode.addListener(_onFocusChange);
 
-    _focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _focusNode.requestFocus();
+        _replyTaggerController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _replyTaggerController.text.length),
+        );
+        // Attempt an initial scroll after a short delay,
+        // in case the keyboard is already up or for immediate visibility.
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted && _focusNode.hasFocus) {
+            _scrollToShowFocusedInput();
+          }
+        });
+      }
+    });
   }
 
   @override
+  void dispose() {
+    _replyTaggerController.dispose();
+    _scrollController.dispose();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus && mounted) {
+      // Delay to allow keyboard animation and layout reflow
+      Future.delayed(const Duration(milliseconds: 350), () {
+        if (mounted && _focusNode.hasFocus) {
+          _scrollToShowFocusedInput();
+        }
+      });
+    }
+  }
+
+  void _scrollToShowFocusedInput() {
+    if (!mounted || !_focusNode.hasPrimaryFocus) return;
+
+    final BuildContext? focusedContext = _focusNode.context;
+    if (focusedContext != null) {
+      final RenderObject? renderObject = focusedContext.findRenderObject();
+      if (renderObject != null) {
+        final ScrollableState? scrollableState = Scrollable.maybeOf(focusedContext);
+        if (scrollableState != null && scrollableState.position.hasPixels) {
+          scrollableState.position.ensureVisible(
+            renderObject,
+            alignment: 0.1, // Try to show a bit of context above (0.0 is top, 0.5 is center)
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        Navigator.of(context).pop();
-      },
-      child: SingleChildScrollView(
-        child: Container(
-            child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GestureDetector(
-            onTap: () {},
-            behavior: HitTestBehavior.translucent,
-            child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+    final mediaQuery = MediaQuery.of(context);
+    final topSystemPadding = mediaQuery.padding.top; // Height of the status bar
+    final keyboardHeight = mediaQuery.viewInsets.bottom; // Height of the keyboard when visible
+
+    // Desired vertical margin for the dialog from the safe areas of the screen
+    const double verticalDialogScreenMargin = 20.0;
+    // Desired horizontal margin for the dialog
+    const double horizontalDialogScreenMargin = 20.0;
+
+    // This outer Padding widget is crucial.
+    // It defines the space WHERE THE DIALOG (Material widget) WILL BE PLACED.
+    // - top: Accounts for status bar + desired margin.
+    // - bottom: Accounts for keyboard height + desired margin. This effectively
+    //           pushes the dialog up when the keyboard appears, reducing the
+    //           vertical space available to the dialog.
+    // - left/right: Horizontal margins for the dialog.
+    return Padding(
+      padding: EdgeInsets.only(
+        left: horizontalDialogScreenMargin,
+        right: horizontalDialogScreenMargin,
+        top: topSystemPadding + verticalDialogScreenMargin,
+        bottom: keyboardHeight + verticalDialogScreenMargin,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        clipBehavior: Clip.antiAlias, // Ensures content respects border radius
+        child: SingleChildScrollView(
+          // This SingleChildScrollView makes the *content inside the Material dialog* scrollable.
+          // Its viewport height is determined by the space left for the Material widget
+          // by the outer Padding.
+
+          controller: _scrollController,
+          padding: const EdgeInsets.all(4.0), // Internal padding for the dialog's content
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Dialog content takes minimum necessary height
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Display the status being replied to
               Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[100]),
-                  child: Card(
-                      shadowColor: Colors.transparent,
-                      child: MastodonStatusCardBody(status: status, originalStatus: widget.status))),
-              SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    Card(
-                      color: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      borderOnForeground: false,
-                      surfaceTintColor: Colors.transparent,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        controller: _controller,
-                        decoration: InputDecoration(hintText: "Reply"),
-                        maxLines: 3,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerLowest, // A subtle background
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: MastodonStatusCardBody(
+                        status: _effectiveStatus,
+                        originalStatus: widget.status, // Pass the original for reblog info
                       ),
                     ),
-                    SizedBox(height: 16),
-                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      ElevatedButton(
-                          onPressed: () {
-                            MastodonStatusRepository.replyToStatus(status.id, _controller.text);
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("Reply")),
-                    ])
-                  ],
-                ),
-              )
-            ]),
+                    const SizedBox(height: 12.0),
+
+                    // Compose area using SharedComposeWidget
+                    SharedComposeWidget(
+                      taggerController: _replyTaggerController,
+                      focusNode: _focusNode,
+                      hintText: "Your reply...",
+                      minLines: 4, // A good default for reply boxes
+                      maxLines: 8, // Allows for longer replies with internal scrolling
+                    ),
+                    const SizedBox(height: 16.0),
+                  ])),
+
+              // Action button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.reply),
+                    label: const Text("Reply"),
+                    onPressed: () {
+                      final replyText = _replyTaggerController.text.trim();
+                      // Ensure reply is not empty and actually different from just prefilled mentions
+                      if (replyText.isNotEmpty && replyText != _effectiveStatus.replyMentions().join(' ').trim()) {
+                        MastodonStatusRepository.replyToStatus(_effectiveStatus.id, replyText);
+                        Navigator.of(context).pop(); // Close dialog on successful reply
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Replied!')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Reply cannot be empty.')),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-        )),
+        ),
       ),
     );
   }

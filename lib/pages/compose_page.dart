@@ -1,3 +1,4 @@
+import 'package:fedi_pipe/components/search_result_view.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/repositories/mastodon/account_repository.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
@@ -98,49 +99,21 @@ class _ComposePageState extends State<ComposePage> {
                   ],
                 ),
                 if (accounts.isNotEmpty)
-                  SearchResultView(
-                    accounts: accounts,
-                    onTap: (account) {
-                      flutterTaggerController.addTag(id: account.id, name: '${account.acct}');
-                      setState(() {
-                        accounts = [];
-                      });
-                    },
-                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: SearchResultView(
+                        accounts: accounts,
+                        onTap: (account) {
+                          flutterTaggerController.addTag(id: account.id, name: '${account.acct}');
+                          setState(() {
+                            accounts = [];
+                          });
+                        },
+                      )),
               ],
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class SearchResultView extends StatelessWidget {
-  final List<MastodonAccountModel> accounts;
-  final Function(MastodonAccountModel) onTap;
-
-  const SearchResultView({
-    Key? key,
-    required this.accounts,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      constraints: const BoxConstraints(maxHeight: 200),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: accounts.length,
-        itemBuilder: (context, index) {
-          final account = accounts[index];
-          return ListTile(
-            title: Text('@${account.acct}'),
-            onTap: () => onTap(account),
-          );
-        },
       ),
     );
   }
