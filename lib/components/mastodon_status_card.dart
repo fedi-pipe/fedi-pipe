@@ -724,6 +724,9 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
         _replyTaggerController.selection = TextSelection.fromPosition(
           TextPosition(offset: _replyTaggerController.text.length),
         );
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && _focusNode.hasFocus) _scrollToShowFocusedInput();
+        });
       }
     });
   }
@@ -739,7 +742,7 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
 
   void _onFocusChange() {
     if (_focusNode.hasFocus && mounted) {
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 350), () {
         if (mounted && _focusNode.hasFocus) {
           _scrollToShowFocusedInput();
         }
@@ -748,17 +751,17 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
   }
 
   void _scrollToShowFocusedInput() {
-    if (!mounted) return;
+    if (!mounted || !_focusNode.hasPrimaryFocus) return;
 
     final focusedContext = _focusNode.context;
     if (focusedContext != null) {
       final scrollableState = Scrollable.maybeOf(focusedContext);
       if (scrollableState != null && scrollableState.position.hasPixels) {
-        Scrollable.ensureVisible(
-          focusedContext,
-          alignment: 0.0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
+        scrollableState.position.ensureVisible(
+          _focusNode.renderObject!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
         );
       }
     }
@@ -766,75 +769,78 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
-            child: GestureDetector(
-              onTap: () {},
-              child: Material(
-                elevation: 8.0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16.0),
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(8.0),
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        top: MediaQuery.of(context).padding.top + 20.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+      ),
+      child: Material(
+        elevation: 8.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: MastodonStatusCardBody(
+                        status: _effectiveStatus,
+                        originalStatus: widget.status,
+                      ),
+                    ),
+                    const SizedBox(height: 12.0),
+                    SharedComposeWidget(
+                      taggerController: _replyTaggerController,
+                      focusNode: _focusNode,
+                      hintText: "Your reply...",
+                      minLines: 4,
+                      maxLines: 8,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.reply),
+                          label: const Text("Reply"),
+                          onPressed: () {
+                            final replyText = _replyTaggerController.text.trim();
+                            if (replyText.isNotEmpty &&
+                                replyText != _effectiveStatus.replyMentions().join(' ').trim()) {
+                              MastodonStatusRepository.replyToStatus(_effectiveStatus.id, replyText);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Replied!')),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Reply cannot be empty.')),
+                              );
+                            }
+                          },
                         ),
-                        child: MastodonStatusCardBody(
-                          status: _effectiveStatus,
-                          originalStatus: widget.status,
-                        ),
-                      ),
-                      SharedComposeWidget(
-                        taggerController: _replyTaggerController,
-                        focusNode: _focusNode,
-                        hintText: "Your reply...",
-                        minLines: 3,
-                        maxLines: 6,
-                      ),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.reply),
-                            label: const Text("Reply"),
-                            onPressed: () {
-                              final replyText = _replyTaggerController.text.trim();
-                              if (replyText.isNotEmpty &&
-                                  replyText != _effectiveStatus.replyMentions().join(' ').trim()) {
-                                MastodonStatusRepository.replyToStatus(_effectiveStatus.id, replyText);
-                                Navigator.of(context).pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Replied!')),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Reply cannot be empty.')),
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
