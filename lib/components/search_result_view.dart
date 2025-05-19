@@ -22,84 +22,85 @@ class SearchResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate the maxHeight for the suggestions box.
-    // This allows the box to show up to `_maxVisibleItemsBeforeScroll` items
-    // without internal scrolling, and then scroll for more items.
-    final calculatedMaxHeight = _maxVisibleItemsBeforeScroll * _estimatedItemHeight;
-
-    // If there are no accounts, we don't want to show an empty box.
-    // SharedComposeWidget should ideally handle not showing the overlay if accounts is empty,
-    // but this is a safeguard for SearchResultView itself.
     if (accounts.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Material(
-        elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0), // Consistent rounded corners
-        ),
-        clipBehavior: Clip.antiAlias, // Ensures content respects the rounded corners
-        child: Container(
-          color: Theme.of(context).colorScheme.surfaceContainerHigh, // Elevated surface color
-          constraints: BoxConstraints(
-            // The container will be at most this tall.
-            maxHeight: calculatedMaxHeight,
-            // It can be shorter if the content is less, due to ListView's shrinkWrap.
-            minHeight: 0, // Allow it to shrink completely if needed (though handled by isEmpty check above)
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double contentPreferredMaxHeight = _maxVisibleItemsBeforeScroll * _estimatedItemHeight;
+        final double parentProvidedMaxHeight = constraints.hasBoundedHeight 
+                                               ? constraints.maxHeight 
+                                               : contentPreferredMaxHeight;
+        final double actualMaxHeight = (contentPreferredMaxHeight < parentProvidedMaxHeight)
+                                      ? contentPreferredMaxHeight
+                                      : parentProvidedMaxHeight;
+
+        return Material(
+          elevation: 4.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
           ),
-          child: Scrollbar(
-            // Added Scrollbar
-            thumbVisibility: true, // Make scrollbar thumb visible when scrolling
-            child: ListView.builder(
-              shrinkWrap:
-                  true, // THIS IS KEY: Makes ListView take up only necessary vertical space for its items, up to the parent's constraints.
-              padding: const EdgeInsets.symmetric(vertical: 6.0), // Padding for the list itself
-              itemCount: accounts.length,
-              // Consider using itemExtent if all your ListTiles have a guaranteed fixed height.
-              // This can improve scroll performance for very long lists, but for a few suggestion items,
-              // dynamic height is usually fine.
-              // itemExtent: _estimatedItemHeight,
-              itemBuilder: (context, index) {
-                final account = accounts[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 20.0, // Standard avatar size
-                    backgroundImage:
-                        (account.avatar != null && account.avatar!.isNotEmpty) ? NetworkImage(account.avatar!) : null,
-                    onBackgroundImageError: (account.avatar != null && account.avatar!.isNotEmpty) ? (_, __) {} : null,
-                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                    child: (account.avatar == null || account.avatar!.isEmpty)
-                        ? Icon(
-                            Icons.person,
-                            size: 22, // Adjust icon size to fit CircleAvatar
-                            color: Theme.of(context).colorScheme.onSecondaryContainer,
-                          )
-                        : null,
-                  ),
-                  title: Text(
-                    account.displayName ?? account.username,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15.0,
-                      color: Theme.of(context).colorScheme.onSurface,
+          clipBehavior: Clip.antiAlias,
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: actualMaxHeight,
+              minHeight: 0,
+            ),
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                itemCount: accounts.length,
+                itemBuilder: (context, index) {
+                  final account = accounts[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                    leading: CircleAvatar(
+                      radius: 20.0,
+                      backgroundImage: (account.avatar != null && account.avatar!.isNotEmpty)
+                          ? NetworkImage(account.avatar!)
+                          : null,
+                      onBackgroundImageError: (account.avatar != null && account.avatar!.isNotEmpty) ? (_, __) {} : null,
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      child: (account.avatar == null || account.avatar!.isEmpty)
+                          ? Icon(
+                              Icons.person,
+                              size: 22,
+                              color: Theme.of(context).colorScheme.onSecondaryContainer,
+                            )
+                          : null,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '@${account.acct ?? account.username}',
-                    style: TextStyle(
-                      fontSize: 13.0,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    title: Text(
+                      account.displayName ?? account.username,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15.0,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () => onTap(account),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0), // Adjusted padding
-                );
-              },
+                    subtitle: Text(
+                      '@${account.acct ?? account.username}',
+                      style: TextStyle(
+                        fontSize: 13.0,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () => onTap(account),
+                  );
+                },
+              ),
             ),
           ),
-        ));
+        );
+      }
+    );
+  }
   }
 }
