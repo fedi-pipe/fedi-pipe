@@ -776,16 +776,30 @@ class _ReplyDialogBodyState extends State<ReplyDialogBody> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    // This outer Padding provides margins for the dialog against the screen edges
-    // and also incorporates the keyboard's height at the bottom, pushing the
-    // entire dialog structure up when the keyboard is visible.
+    final mediaQuery = MediaQuery.of(context);
+    final topSystemPadding = mediaQuery.padding.top; // Height of the status bar
+    final keyboardHeight = mediaQuery.viewInsets.bottom; // Height of the keyboard when visible
+
+    // Desired vertical margin for the dialog from the safe areas of the screen
+    const double verticalDialogScreenMargin = 20.0;
+    // Desired horizontal margin for the dialog
+    const double horizontalDialogScreenMargin = 20.0;
+
+    // This outer Padding widget is crucial.
+    // It defines the space WHERE THE DIALOG (Material widget) WILL BE PLACED.
+    // - top: Accounts for status bar + desired margin.
+    // - bottom: Accounts for keyboard height + desired margin. This effectively
+    //           pushes the dialog up when the keyboard appears, reducing the
+    //           vertical space available to the dialog.
+    // - left/right: Horizontal margins for the dialog.
     return Padding(
       padding: EdgeInsets.only(
-        left: 20.0,
-        right: 20.0,
-        top: MediaQuery.of(context).padding.top + 20.0, // Status bar + margin
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0, // Keyboard + margin
+        left: horizontalDialogScreenMargin,
+        right: horizontalDialogScreenMargin,
+        top: topSystemPadding + verticalDialogScreenMargin,
+        bottom: keyboardHeight + verticalDialogScreenMargin,
       ),
       child: Material(
         elevation: 8.0,
