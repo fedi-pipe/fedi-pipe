@@ -9,7 +9,7 @@ class SearchResultView extends StatelessWidget {
   /// Approximate height of a single ListTile.
   /// Standard ListTiles are around 56.0, but this can vary with content, density, etc.
   /// Adjust if your ListTiles are consistently taller or shorter.
-  static const double _estimatedItemHeight = 60.0;
+  static const double _estimatedItemHeight = 58.0; // Adjusted for slightly more padding in ListTile
 
   /// Maximum number of items to display before the list becomes scrollable.
   static const int _maxVisibleItemsBeforeScroll = 4;
