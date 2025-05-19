@@ -99,15 +99,17 @@ class _ComposePageState extends State<ComposePage> {
                   ],
                 ),
                 if (accounts.isNotEmpty)
-                  SearchResultView(
-                    accounts: accounts,
-                    onTap: (account) {
-                      flutterTaggerController.addTag(id: account.id, name: '${account.acct}');
-                      setState(() {
-                        accounts = [];
-                      });
-                    },
-                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: SearchResultView(
+                        accounts: accounts,
+                        onTap: (account) {
+                          flutterTaggerController.addTag(id: account.id, name: '${account.acct}');
+                          setState(() {
+                            accounts = [];
+                          });
+                        },
+                      )),
               ],
             ),
           ],
