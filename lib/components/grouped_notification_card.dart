@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:fedi_pipe/components/mastodon_status_card.dart'; // For potential reuse or inspiration
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:url_launcher/url_launcher.dart';
 
 class GroupedNotificationCard extends StatelessWidget {
   final GroupedNotificationItem item;
