@@ -81,6 +81,7 @@ class MastodonNotificationModel {
   final DateTime createdAt;
   final MastodonAccountModel account;
   final MastodonStatusModel? status;
+  final String? groupKey; // Add this
 
   MastodonNotificationModel({
     required this.id,
@@ -88,6 +89,7 @@ class MastodonNotificationModel {
     required this.createdAt,
     required this.account,
     this.status,
+    this.groupKey, // Add this
   });
 
   factory MastodonNotificationModel.fromJson(Map<String, dynamic> json) {
@@ -98,6 +100,7 @@ class MastodonNotificationModel {
       createdAt: DateTime.parse(json['created_at']),
       account: MastodonAccountModel.fromJson(json['account']),
       status: status != null ? MastodonStatusModel.fromJson(status) : null,
+      groupKey: json['group_key'], // Add this
     );
   }
 
