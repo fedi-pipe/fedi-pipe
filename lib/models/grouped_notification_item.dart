@@ -11,7 +11,7 @@ class GroupedNotificationItem {
   // List of accounts that contributed to this grouped notification
   // e.g., multiple users who favourited/reblogged the same post
   final List<MastodonAccountModel> accounts;
-  // The most recent notification that forms this group (for timestamp and other details)
+  final MastodonAccountModel? singleAccount; // Ensure this field is present
   final MastodonNotificationModel latestNotificationInGroup;
   // List of all original notifications that form this group, if needed for detailed expansion
   final List<MastodonNotificationModel> originalNotifications;
@@ -21,13 +21,13 @@ class GroupedNotificationItem {
     required this.primaryType,
     this.status,
     required this.accounts,
-    required this.latestNotificationInGroup,
+    this.singleAccount, // Make sure this line is in your constructor
     required this.originalNotifications,
   });
 
   // Helper to get the most recent creation date for sorting or display
   DateTime get createdAt => DateTime.parse(latestNotificationInGroup.createdAt as String);
 
-  // Helper to get a single representative account (e.g., for mentions or single-actor groups)
-  MastodonAccountModel get representativeAccount => accounts.first;
+  // Updated getter for clarity, ensuring it uses the singleAccount if available.
+  MastodonAccountModel get representativeAccount => singleAccount ?? accounts.first;
 }
