@@ -55,23 +55,22 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
         _isLoading = true;
         _error = null;
         if (isRefresh) {
-           _sinceId = _groupedNotifications.isNotEmpty ? _groupedNotifications.first.latestNotificationInGroup.id : null;
+          _sinceId = _groupedNotifications.isNotEmpty ? _groupedNotifications.first.latestNotificationInGroup.id : null;
         }
       });
     }
-    
+
     // If refreshing, we want to get notifications newer than the newest one we have.
     // If paginating (maxId is provided), we get older notifications.
     String? currentSinceId = isRefresh ? _sinceId : null;
     String? currentMaxId = isRefresh ? null : (maxId ?? _maxId);
-
 
     try {
       List<MastodonNotificationModel> fetchedNotifications = await MastodonNotificationRepository.fetchNotifications(
         limit: 40, // Fetch a decent batch
         excludeTypes: ['follow_request', 'poll', 'update', 'admin.sign_up', 'admin.report'], // Common exclusions
         previousId: currentMaxId, // For "load older"
-        nextId: currentSinceId,    // For "load newer" on refresh
+        nextId: currentSinceId, // For "load newer" on refresh
       );
 
       if (mounted) {
@@ -80,13 +79,23 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
           if (isRefresh) {
             // Prepend new notifications and keep existing ones that are not in the new batch
             final newNotificationIds = fetchedNotifications.map((n) => n.id).toSet();
-            allNotifications = [...fetchedNotifications, ..._groupedNotifications.expand((group) => group.originalNotifications).where((n) => !newNotificationIds.contains(n.id))];
-          } else if (maxId != null) { // Loading older
-            allNotifications = [..._groupedNotifications.expand((group) => group.originalNotifications), ...fetchedNotifications];
-          } else { // Default initial load (should be covered by isRefresh true)
+            allNotifications = [
+              ...fetchedNotifications,
+              ..._groupedNotifications
+                  .expand((group) => group.originalNotifications)
+                  .where((n) => !newNotificationIds.contains(n.id))
+            ];
+          } else if (maxId != null) {
+            // Loading older
+            allNotifications = [
+              ..._groupedNotifications.expand((group) => group.originalNotifications),
+              ...fetchedNotifications
+            ];
+          } else {
+            // Default initial load (should be covered by isRefresh true)
             allNotifications = fetchedNotifications;
           }
-          
+
           // Deduplicate just in case
           final uniqueNotifications = LinkedHashMap<String, MastodonNotificationModel>.fromIterable(
             allNotifications,
@@ -96,17 +105,18 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
 
           // Update pagination markers
           if (fetchedNotifications.isNotEmpty) {
-            if (isRefresh || sinceId != null) { // Fetched newer
-                // _sinceId is already set or could be fetchedNotifications.first.id if needed for next refresh
+            if (isRefresh || sinceId != null) {
+              // Fetched newer
+              // _sinceId is already set or could be fetchedNotifications.first.id if needed for next refresh
             }
-            if (maxId != null || !isRefresh) { // Fetched older or initial full load
-                _maxId = fetchedNotifications.last.id;
+            if (maxId != null || !isRefresh) {
+              // Fetched older or initial full load
+              _maxId = fetchedNotifications.last.id;
             }
-             if (isRefresh && fetchedNotifications.isNotEmpty) {
-                _sinceId = fetchedNotifications.first.id; // Update sinceId for next pull to refresh
+            if (isRefresh && fetchedNotifications.isNotEmpty) {
+              _sinceId = fetchedNotifications.first.id; // Update sinceId for next pull to refresh
             }
           }
-
 
           _groupNotifications(uniqueNotifications);
           _isLoading = false;
@@ -132,16 +142,15 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
         key = '${n.type}-${n.status!.id}';
       } else if (n.type == 'follow') {
         key = 'follow-${n.account.id}'; // Group follows by the account being followed (you) or by the follower
-                                        // For "you are followed by X", group by "follow-YOUR_ID-X.account.id" might be too granular
-                                        // For now, let's treat follows as individual unless many from same person (which API usually doesn't give)
-                                        // The provided `group_key` from API for follow is 'follow-[follower_id]'
-                                        // If we want to group "X, Y, Z followed you", we need a different strategy or rely on server grouping.
-                                        // For now, using the API's groupKey for follows and mentions if it makes sense.
+        // For "you are followed by X", group by "follow-YOUR_ID-X.account.id" might be too granular
+        // For now, let's treat follows as individual unless many from same person (which API usually doesn't give)
+        // The provided `group_key` from API for follow is 'follow-[follower_id]'
+        // If we want to group "X, Y, Z followed you", we need a different strategy or rely on server grouping.
+        // For now, using the API's groupKey for follows and mentions if it makes sense.
         key = n.groupKey ?? 'ungrouped-${n.id}'; // Fallback to API's group key or individual
       } else if (n.type == 'mention' && n.status != null) {
-         key = n.groupKey ?? 'mention-${n.id}'; // Mentions are usually individual
-      }
-      else {
+        key = n.groupKey ?? 'mention-${n.id}'; // Mentions are usually individual
+      } else {
         key = n.groupKey ?? 'ungrouped-${n.id}'; // Fallback for other types or if groupKey is null
       }
       grouped.putIfAbsent(key, () => []).add(n);
@@ -151,14 +160,14 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
     grouped.forEach((key, group) {
       if (group.isEmpty) return;
 
-      group.sort((a, b) => DateTime.parse(b.createdAt as String).compareTo(DateTime.parse(a.createdAt as String)));
+      group.sort((a, b) => DateTime.parse(b.createdAt.toString()).compareTo(DateTime.parse(a.createdAt.toString())));
       final latestNotification = group.first;
       final accounts = group.map((n) => n.account).toList();
       // Simple de-duplication of accounts for display
-      final uniqueAccounts = LinkedHashMap<String, MastodonAccountModel>.fromIterable(
-        accounts, key: (acc) => acc.id, value: (acc) => acc
-      ).values.toList();
-
+      final uniqueAccounts =
+          LinkedHashMap<String, MastodonAccountModel>.fromIterable(accounts, key: (acc) => acc.id, value: (acc) => acc)
+              .values
+              .toList();
 
       result.add(GroupedNotificationItem(
         displayGroupKey: key,
@@ -167,7 +176,9 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
         accounts: uniqueAccounts,
         latestNotificationInGroup: latestNotification,
         originalNotifications: group,
-        singleAccount: latestNotification.type == 'mention' || latestNotification.type == 'follow' ? latestNotification.account : null,
+        singleAccount: latestNotification.type == 'mention' || latestNotification.type == 'follow'
+            ? latestNotification.account
+            : null,
       ));
     });
 
@@ -176,12 +187,12 @@ class _GroupedNotificationPageState extends State<GroupedNotificationPage> {
     _groupedNotifications = result;
   }
 
-
   Widget _buildNotificationList() {
     if (_groupedNotifications.isEmpty) {
-       if (_isLoading) { // Initial load handled by RefreshIndicator's spinner
-         return ListView( physics: const AlwaysScrollableScrollPhysics()); // Needs to be scrollable
-       }
+      if (_isLoading) {
+        // Initial load handled by RefreshIndicator's spinner
+        return ListView(physics: const AlwaysScrollableScrollPhysics()); // Needs to be scrollable
+      }
       return LayoutBuilder(builder: (context, constraints) {
         return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

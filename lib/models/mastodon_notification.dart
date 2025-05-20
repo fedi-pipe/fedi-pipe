@@ -78,7 +78,7 @@ enum NotificationFeedType {
 class MastodonNotificationModel {
   final String id;
   final String type;
-  final DateTime createdAt;
+  final String createdAt;
   final MastodonAccountModel account;
   final MastodonStatusModel? status;
   final String? groupKey; // Add this
@@ -97,7 +97,7 @@ class MastodonNotificationModel {
     return MastodonNotificationModel(
       id: json['id'],
       type: json['type'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: json['created_at'],
       account: MastodonAccountModel.fromJson(json['account']),
       status: status != null ? MastodonStatusModel.fromJson(status) : null,
       groupKey: json['group_key'], // Add this

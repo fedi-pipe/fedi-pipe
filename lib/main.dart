@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:fedi_pipe/pages/favourite_page.dart';
+import 'package:fedi_pipe/pages/grouped_notification_page.dart';
 import 'package:fedi_pipe/pages/home_timeline_page.dart';
 import 'package:fedi_pipe/pages/manage_accounts_page.dart';
 import 'package:fedi_pipe/pages/add_token_page.dart';
@@ -234,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       HomeTimelinePage(),
       PublicTimelinePage(),
-      NotificationPage(),
+      GroupedNotificationPage(),
       FavouritePage(),
       BookmarkPage(),
     ];
