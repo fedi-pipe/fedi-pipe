@@ -32,42 +32,68 @@ class GroupedNotificationCard extends StatelessWidget {
 
   String _buildActionText() {
     final count = item.accounts.length;
-    final firstAccountName = item.accounts.first.displayName.isNotEmpty 
-                             ? item.accounts.first.displayName 
-                             : item.accounts.first.username;
+    if (count == 0) return "Notification"; // Fallback, should ideally not happen
+
+    final MastodonAccountModel firstAccountModel = item.accounts.first;
+    final String firstAccountName = (firstAccountModel.displayName?.isNotEmpty ?? false)
+                                   ? firstAccountModel.displayName!
+                                   : firstAccountModel.username;
 
     String actionVerb = '';
     switch (item.primaryType) {
       case 'favourite':
-        actionVerb = count > 1 ? 'favourited' : 'favourited';
+        actionVerb = 'favourited';
         break;
       case 'reblog':
-        actionVerb = count > 1 ? 'reblogged' : 'reblogged';
+        actionVerb = 'reblogged';
         break;
       case 'follow':
-        actionVerb = count > 1 ? 'followed you' : 'followed you';
-        return count > 1 
-            ? '${item.accounts.take(2).map((a) => a.displayName.isNotEmpty ? a.displayName : a.username).join(', ')}${count > 2 ? ' and ${count - 2} others' : ''} $actionVerb'
-            : '$firstAccountName $actionVerb';
+        actionVerb = 'followed you';
+        if (count == 1) {
+          return '$firstAccountName $actionVerb';
+        } else {
+          // Take up to 2 account names for the summary
+          String accountNamesSummary = item.accounts.take(2).map((acc) {
+            return (acc.displayName?.isNotEmpty ?? false) ? acc.displayName! : acc.username;
+          }).join(', ');
+          if (count > 2) {
+            accountNamesSummary += ' and ${count - 2} others';
+          }
+          return '$accountNamesSummary $actionVerb';
+        }
       case 'mention':
-        return '${item.representativeAccount.displayName} mentioned you';
+        final MastodonAccountModel mentioner = item.representativeAccount;
+        final String mentionerName = (mentioner.displayName?.isNotEmpty ?? false)
+                                     ? mentioner.displayName!
+                                     : mentioner.username;
+        return '$mentionerName mentioned you';
       case 'poll':
         return 'A poll you participated in has ended';
       case 'update':
-        return '${item.representativeAccount.displayName} edited a status';
+        final MastodonAccountModel updater = item.representativeAccount;
+        final String updaterName = (updater.displayName?.isNotEmpty ?? false)
+                                   ? updater.displayName!
+                                   : updater.username;
+        return '$updaterName edited a status';
       default:
-        actionVerb = 'interacted with';
+        actionVerb = 'interacted with'; // Generic fallback
     }
 
+    // For favourite, reblog, and other grouped status interactions
     if (count == 1) {
       return '$firstAccountName $actionVerb your status';
     } else if (count == 2) {
-      final secondAccountName = item.accounts[1].displayName.isNotEmpty
-                                ? item.accounts[1].displayName
-                                : item.accounts[1].username;
+      final MastodonAccountModel secondAccountModel = item.accounts[1];
+      final String secondAccountName = (secondAccountModel.displayName?.isNotEmpty ?? false)
+                                     ? secondAccountModel.displayName!
+                                     : secondAccountModel.username;
       return '$firstAccountName and $secondAccountName $actionVerb your status';
-    } else {
-      return '$firstAccountName, ${item.accounts[1].displayName.isNotEmpty ? item.accounts[1].displayName : item.accounts[1].username} and ${count - 2} others $actionVerb your status';
+    } else { // count > 2
+      final MastodonAccountModel secondAccountModel = item.accounts[1];
+      final String secondAccountName = (secondAccountModel.displayName?.isNotEmpty ?? false)
+                                     ? secondAccountModel.displayName!
+                                     : secondAccountModel.username;
+      return '$firstAccountName, $secondAccountName and ${count - 2} others $actionVerb your status';
     }
   }
   
