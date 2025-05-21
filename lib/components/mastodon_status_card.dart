@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fedi_pipe/components/html_renderer.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
 import 'package:fedi_pipe/extensions/string.dart';
 import 'package:fedi_pipe/models/mastodon_status.dart';
@@ -574,7 +575,12 @@ class MastodonStatusCardBody extends StatelessWidget {
                       )));
             },
             onTap: () {
-              MastodonStatusRepository.fetchStatus(originalStatus.id);
+              // Navigate to the StatusDetailPage
+              context.pushNamed(
+                'statusDetail',
+                pathParameters: {'id': status.id},
+                extra: originalStatus, // Pass the full status object
+              );
             },
             child: Text(timeago.format(DateTime.parse(status.createdAt)))),
       ),
