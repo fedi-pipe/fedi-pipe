@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fedi_pipe/components/html_renderer.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/gestures.dart';
 import 'package:fedi_pipe/components/mastodon_profile_bottom_sheet.dart';
 import 'package:fedi_pipe/components/shared_component_widget.dart';
 import 'package:fedi_pipe/extensions/string.dart';
@@ -535,13 +536,35 @@ class MastodonStatusCardBody extends StatelessWidget {
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
       if (originalStatus.reblog != null)
         Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 0), // Placed above ListTile
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                "Boosted by @${originalStatus.acct}",
-                textAlign: TextAlign.right,
+              Icon(Icons.repeat, size: 18, color: Theme.of(context).colorScheme.secondary),
+              SizedBox(width: 8),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.9),
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: originalStatus.account.displayName ?? originalStatus.account.username, // Booster's name
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            // originalStatus.account is the booster
+                            showMastodonProfileBottomSheet(context, originalStatus.account);
+                          },
+                      ),
+                      TextSpan(text: " boosted"),
+                    ],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
