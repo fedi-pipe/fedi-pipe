@@ -21,23 +21,50 @@ class StatusDetailPage extends StatefulWidget {
 }
 
 class _StatusDetailPageState extends State<StatusDetailPage> {
-  // State variables will be added in the next step
-  
+  MastodonStatusModel? _mainStatus;
+  StatusContextModel? _statusContext;
+  bool _isLoading = true;
+  String? _error;
+
   @override
   void initState() {
     super.initState();
-    // Fetch logic will be added later
+    _mainStatus = widget.initialStatus;
+    if (_mainStatus == null) {
+      _isLoading = true; 
+    } else {
+      // If initial status is provided, we might not need to show a full page loader initially,
+      // but we still need to fetch the context.
+      _isLoading = false; // Or true if you prefer to load everything together
+    }
+    _fetchStatusDetails();
+  }
+
+  Future<void> _fetchStatusDetails() async {
+    // Implementation in next step
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Status Detail'), // Placeholder title
+        title: Text(_mainStatus?.account.displayName ?? _mainStatus?.account.username ?? 'Status Detail'),
       ),
-      body: Center(
-        child: Text('Status Detail Page for ID: ${widget.statusId} - Content Coming Soon!'),
-      ),
+      body: _buildBody(),
     );
+  }
+
+  Widget _buildBody() {
+    // Implementation in a later step
+    if (_isLoading && _mainStatus == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(child: Text(_error!));
+    }
+    if (_mainStatus == null) {
+      return Center(child: Text('Status not found.'));
+    }
+    return Center(child: Text('Content for status ID: ${widget.statusId} will be displayed here. Full UI in next steps.'));
   }
 }
