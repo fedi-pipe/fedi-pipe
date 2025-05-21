@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
+import 'package:fedi_pipe/pages/status_detail_page.dart';
+import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/pages/favourite_page.dart';
 import 'package:fedi_pipe/pages/grouped_notification_page.dart';
 import 'package:fedi_pipe/pages/home_timeline_page.dart';
@@ -74,6 +76,16 @@ final _router = GoRouter(
       path: '/manage-accounts',
       name: 'manage-accounts',
       builder: (context, state) => ManageAccountsPage(),
+    ),
+    GoRoute(
+      path: '/status/:id', // Path parameter for statusId
+      name: 'statusDetail',
+      builder: (context, state) {
+        final statusId = state.pathParameters['id']!;
+        // Attempt to cast `extra` to MastodonStatusModel, allow null if not provided or wrong type
+        final MastodonStatusModel? status = state.extra is MastodonStatusModel ? state.extra as MastodonStatusModel : null;
+        return StatusDetailPage(statusId: statusId, initialStatus: status);
+      },
     ),
   ],
 );
