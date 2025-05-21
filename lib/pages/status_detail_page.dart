@@ -41,7 +41,36 @@ class _StatusDetailPageState extends State<StatusDetailPage> {
   }
 
   Future<void> _fetchStatusDetails() async {
-    // Implementation in next step
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true; // Set loading true at the beginning of any fetch operation
+      _error = null;
+    });
+
+    try {
+      // Fetch main status, even if initialStatus was provided, to get latest data.
+      // Or, only fetch if _mainStatus is null: final statusFuture = _mainStatus == null ? MastodonStatusRepository.fetchStatus(widget.statusId) : Future.value(_mainStatus);
+      final statusFuture = MastodonStatusRepository.fetchStatus(widget.statusId);
+      final contextFuture = MastodonStatusRepository.fetchContext(widget.statusId);
+
+      // Wait for both futures to complete
+      final results = await Future.wait([statusFuture, contextFuture]);
+      
+      if (!mounted) return; // Check if the widget is still in the tree
+      
+      setState(() {
+        _mainStatus = results[0] as MastodonStatusModel;
+        _statusContext = results[1] as StatusContextModel;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return; // Check again
+      setState(() {
+        _error = "Failed to load status details: ${e.toString()}";
+        print("Error in _fetchStatusDetails: $_error"); // For debugging
+        _isLoading = false;
+      });
+    }
   }
 
   @override
