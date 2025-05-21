@@ -148,7 +148,7 @@ final ThemeData appDarkTheme = ThemeData(
   scaffoldBackgroundColor: AppDarkPalette.background,
   appBarTheme: AppBarTheme(
     backgroundColor: AppDarkPalette.surfaceFaded,
-    foregroundColor: AppDarkPalette.background,
+    foregroundColor: AppDarkPalette.text,
     elevation: 0,
   ),
   cardTheme: CardTheme(
