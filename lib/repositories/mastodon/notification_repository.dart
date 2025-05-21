@@ -17,35 +17,45 @@ class MastodonNotificationRepository extends MastodonBaseRepository {
     return status;
   }
 
-  static Future<List<MastodonNotificationModel>> fetchNotifications(
-      {String? previousId, String? nextId, NotificationFeedType feedType = NotificationFeedType.all}) async {
+  static Future<List<MastodonNotificationModel>> fetchNotifications({
+    String? previousId,
+    String? nextId,
+    NotificationFeedType feedType = NotificationFeedType.all, // Keep for potential filtering later
+    int limit = 40, // Default limit, can be overridden
+    List<String> excludeTypes = const ['follow_request'], // Default exclusion
+  }) async {
     final queryParameters = <String, String>{};
+    queryParameters['limit'] = limit.toString();
+
     if (previousId != null) {
       queryParameters['max_id'] = previousId;
     } else if (nextId != null) {
       queryParameters['min_id'] = nextId;
     }
 
-    final path = "/api/v1/notifications";
-    switch (feedType) {
-      case NotificationFeedType.all:
-        break;
-      case NotificationFeedType.mention:
-        queryParameters['types[]'] = 'mention';
-        break;
-      case NotificationFeedType.favourite:
-        queryParameters['types[]'] = 'favourite';
-        break;
-      case NotificationFeedType.reblog:
-        queryParameters['types[]'] = 'reblog';
-        break;
-      case NotificationFeedType.follow:
-        queryParameters['types[]'] = 'follow';
-        break;
+    // Handle exclude_types
+    String excludeTypesQuery = excludeTypes.map((type) => 'exclude_types[]=${Uri.encodeComponent(type)}').join('&');
+
+    String path = "/api/v1/notifications";
+    String queryString = Uri(queryParameters: queryParameters).query;
+    if (queryString.isNotEmpty && excludeTypesQuery.isNotEmpty) {
+      queryString += '&' + excludeTypesQuery;
+    } else if (excludeTypesQuery.isNotEmpty) {
+      queryString = excludeTypesQuery;
+    }
+    
+    if (queryString.isNotEmpty) {
+        path += '?$queryString';
     }
 
-    final response = await Client.get(path, queryParameters: queryParameters);
+    // Make the GET request (path already includes query parameters)
+    final response = await Client.get(path); // Query parameters already in path
+
     final json = jsonDecode(response.body);
+    if (json is! List) { // Add type check for safety
+        print("Unexpected API response format: $json");
+        return [];
+    }
     final notifications = MastodonNotificationModel.fromJsonList(json);
 
     return notifications;
