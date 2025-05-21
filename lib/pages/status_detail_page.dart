@@ -3,6 +3,7 @@ import 'package:fedi_pipe/models/mastodon_status.dart';
 import 'package:fedi_pipe/models/status_context_model.dart';
 import 'package:fedi_pipe/repositories/mastodon/status_repository.dart';
 import 'package:fedi_pipe/components/mastodon_status_card.dart';
+import 'package:fedi_pipe/components/slim_mastodon_status_card.dart';
 // Consider adding a skeleton loader import later
 // import 'package:fedi_pipe/components/skeletons/status_skeleton.dart'; // If you create one
 
@@ -133,9 +134,12 @@ class _StatusDetailPageState extends State<StatusDetailPage> {
       slivers.add(SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
+            // Ancestors can use SlimMastodonStatusCard as well, or a slightly different slim variant if needed.
+            // For consistency in slimness within threads, using SlimMastodonStatusCard here.
+            // The padding here can be adjusted if the SlimMastodonStatusCard already has internal padding.
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: MastodonStatusCard(status: _statusContext!.ancestors[index]),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0), // Adjusted vertical padding
+              child: SlimMastodonStatusCard(status: _statusContext!.ancestors[index]),
             );
           },
           childCount: _statusContext!.ancestors.length,
@@ -168,9 +172,10 @@ class _StatusDetailPageState extends State<StatusDetailPage> {
             slivers.add(SliverList(
             delegate: SliverChildBuilderDelegate(
                 (context, index) {
+                // Using SlimMastodonStatusCard for descendants with existing indentation logic
                 return Padding(
-                    padding: const EdgeInsets.only(left: 24.0, right: 8.0, top: 4.0, bottom: 4.0), // Added left padding for indentation
-                    child: MastodonStatusCard(status: _statusContext!.descendants[index]),
+                    padding: const EdgeInsets.only(left: 24.0, right: 8.0, top: 2.0, bottom: 2.0), // Adjusted vertical padding
+                    child: SlimMastodonStatusCard(status: _statusContext!.descendants[index]),
                 );
                 },
                 childCount: _statusContext!.descendants.length,
