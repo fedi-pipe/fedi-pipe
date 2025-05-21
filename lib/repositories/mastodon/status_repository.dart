@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fedi_pipe/models/mastodon_status.dart';
+import 'package:fedi_pipe/models/status_context_model.dart';
 import 'package:fedi_pipe/repositories/mastodon/mastodon_base_repository.dart';
 
 enum FeedType { public, home, local }
@@ -17,6 +18,13 @@ class MastodonStatusRepository extends MastodonBaseRepository {
     final status = MastodonStatusModel.fromJson(json);
 
     return status;
+  }
+
+  /// NEW — conversation context (ancestors / descendants)
+  static Future<StatusContextModel> fetchContext(String id) async {
+    final response = await Client.get('/api/v1/statuses/$id/context');
+    final json = jsonDecode(response.body);
+    return StatusContextModel.fromJson(json as Map<String, dynamic>);
   }
 
   static Future<PaginationResult<MastodonStatusModel>> fetchBookmarks({
