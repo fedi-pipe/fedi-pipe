@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:app_links/app_links.dart';
 import 'package:fedi_pipe/pages/status_detail_page.dart';
@@ -83,11 +84,138 @@ final _router = GoRouter(
       builder: (context, state) {
         final statusId = state.pathParameters['id']!;
         // Attempt to cast `extra` to MastodonStatusModel, allow null if not provided or wrong type
-        final MastodonStatusModel? status = state.extra is MastodonStatusModel ? state.extra as MastodonStatusModel : null;
+        final MastodonStatusModel? status =
+            state.extra is MastodonStatusModel ? state.extra as MastodonStatusModel : null;
         return StatusDetailPage(statusId: statusId, initialStatus: status);
       },
     ),
   ],
+);
+
+class AppDarkPalette {
+  static Color primaryBlue = Color(0xFF6495ED);
+
+  static Color accentPurple = Color(0xFFB190F1);
+
+  static Color background = Color(0xFF242526);
+
+  static Color surfaceFaded = Color(0xFF18191A);
+
+  static Color text = Color(0xFFF0F2F5);
+
+  static Color textInsignificant = Color(0x99F0F2F5);
+
+  static Color divider = Color(0x1AFFFFFF);
+
+  static final Color buttonBackground = Color.lerp(background, primaryBlue, 0.8)!;
+
+  static Color buttonText = text;
+
+  static Color error = Color(0xFFCF6679);
+  static Color onError = Colors.black;
+
+  static Color accentGreen = Color(0xFF90EE90);
+
+  static Color accentOrange = Color(0xFFFFA500);
+
+  static Color hashtagColor = Color(0xFF20B2AA);
+}
+
+final ThemeData appDarkTheme = ThemeData(
+  brightness: Brightness.dark,
+  colorScheme: ColorScheme(
+    brightness: Brightness.dark,
+    primary: AppDarkPalette.primaryBlue,
+    onPrimary: AppDarkPalette.buttonText,
+    secondary: AppDarkPalette.accentPurple,
+    onSecondary: Colors.black,
+    error: AppDarkPalette.error,
+    onError: AppDarkPalette.onError,
+    surface: AppDarkPalette.background,
+    onSurface: AppDarkPalette.text,
+    background: AppDarkPalette.background,
+    onBackground: AppDarkPalette.text,
+    surfaceContainerHighest: AppDarkPalette.background,
+    surfaceContainerHigh: Color.lerp(AppDarkPalette.background, Colors.white, 0.03),
+    surfaceContainer: Color.lerp(AppDarkPalette.background, Colors.white, 0.06)!,
+    surfaceContainerLow: Color.lerp(AppDarkPalette.background, Colors.white, 0.09)!,
+    surfaceContainerLowest: AppDarkPalette.surfaceFaded,
+    surfaceBright: Color.lerp(AppDarkPalette.background, Colors.white, 0.12)!,
+    surfaceDim: AppDarkPalette.surfaceFaded,
+    outline: AppDarkPalette.divider,
+    outlineVariant: Color.lerp(AppDarkPalette.divider, AppDarkPalette.text, 0.15),
+  ),
+  scaffoldBackgroundColor: AppDarkPalette.background,
+  appBarTheme: AppBarTheme(
+    backgroundColor: AppDarkPalette.surfaceFaded,
+    foregroundColor: AppDarkPalette.background,
+    elevation: 0,
+  ),
+  cardTheme: CardTheme(
+    color: AppDarkPalette.surfaceFaded,
+    elevation: 1,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: AppDarkPalette.buttonBackground,
+      foregroundColor: AppDarkPalette.buttonText,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+    foregroundColor: AppDarkPalette.primaryBlue,
+  )),
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    fillColor: AppDarkPalette.surfaceFaded,
+    hintStyle: TextStyle(color: AppDarkPalette.textInsignificant),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4.0),
+      borderSide: BorderSide(color: AppDarkPalette.divider, width: 1.0),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4.0),
+      borderSide: BorderSide(color: AppDarkPalette.divider, width: 1.0),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4.0),
+      borderSide: BorderSide(color: AppDarkPalette.primaryBlue, width: 2.0),
+    ),
+  ),
+  dividerTheme: DividerThemeData(
+    color: AppDarkPalette.divider,
+    thickness: 1,
+  ),
+  textTheme: Typography.whiteMountainView
+      .apply(
+        bodyColor: AppDarkPalette.text,
+        displayColor: AppDarkPalette.text,
+      )
+      .copyWith(
+        titleMedium: TextStyle(color: AppDarkPalette.text.withOpacity(0.9)),
+        bodySmall: TextStyle(color: AppDarkPalette.textInsignificant),
+      ),
+  iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+    foregroundColor: AppDarkPalette.textInsignificant,
+  )),
+  iconTheme: IconThemeData(
+    color: AppDarkPalette.textInsignificant,
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: AppDarkPalette.surfaceFaded,
+    selectedItemColor: AppDarkPalette.primaryBlue,
+    unselectedItemColor: AppDarkPalette.textInsignificant,
+    type: BottomNavigationBarType.fixed,
+  ),
+  useMaterial3: true,
 );
 
 class MyApp extends StatefulWidget {
@@ -148,27 +276,8 @@ class _MyAppState extends State<MyApp> {
     print("asdasdas");
     return MaterialApp.router(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        textTheme:
-            TextTheme(headlineLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold, color: Colors.black)),
-        useMaterial3: true,
-      ),
+      themeMode: ThemeMode.dark, // Force dark mode initially
+      darkTheme: appDarkTheme,
       routerConfig: _router,
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );

@@ -52,7 +52,7 @@ class _MastodonStatusCardState extends State<MastodonStatusCard> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
